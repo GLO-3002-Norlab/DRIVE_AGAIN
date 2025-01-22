@@ -1,0 +1,21 @@
+Metadata-Version: 2.2
+Name: DRIVE_AGAIN
+Version: 0.0.1
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.19.5
+Requires-Dist: black
+Requires-Dist: pytest
+Requires-Dist: numpy
+
+# DRIVE_AGAIN
+
+# Setup project
+
+1. Create venv
+2. Install dependencies
+
+```sh
+pip install -e .
+
+```
