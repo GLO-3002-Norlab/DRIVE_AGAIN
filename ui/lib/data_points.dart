@@ -2,11 +2,24 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-class DataPointsWidget extends StatefulWidget {
-  final List<Point> boundaries;
-  final List<Point> points = [];
+class PointsData with ChangeNotifier {
+  late final List<Point> _boundaries;
+  final List<Point> _points = [];
 
-  DataPointsWidget({super.key, required this.boundaries});
+  PointsData({required List<Point> boundaries}) {
+    _boundaries = boundaries;
+  }
+
+  void addPoint(Point p) {
+    _points.add(p);
+    notifyListeners();
+  }
+}
+
+class DataPointsWidget extends StatefulWidget {
+  final PointsData data;
+
+  const DataPointsWidget({super.key, required this.data});
 
   @override
   State<DataPointsWidget> createState() => _DataPointsWidgetState();
@@ -28,20 +41,33 @@ class _DataPointsWidgetState extends State<DataPointsWidget>
       height: size,
       child: Container(
         color: Colors.white,
-        child: CustomPaint(
-          painter: DataPointsPainter(
-              boundaries: widget.boundaries, points: widget.points),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Text(
+                "Data Points",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            Expanded(
+              child: CustomPaint(
+                painter: _DataPointsPainter(
+                  widget.data,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class DataPointsPainter extends CustomPainter {
-  final List<Point> boundaries;
-  final List<Point> points;
+class _DataPointsPainter extends CustomPainter {
+  final PointsData data;
 
-  DataPointsPainter({required this.boundaries, required this.points});
+  const _DataPointsPainter(this.data) : super(repaint: data);
 
   List<Point> _transformPoints(
       List<Point> points, List<Point> boundaries, Size size) {
@@ -62,8 +88,9 @@ class DataPointsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final transformedBoundaries =
-        _transformPoints(boundaries, boundaries, size);
-    final transformedPoints = _transformPoints(points, boundaries, size);
+        _transformPoints(data._boundaries, data._boundaries, size);
+    final transformedPoints =
+        _transformPoints(data._points, data._boundaries, size);
     var previous = transformedBoundaries.last;
     for (var b in transformedBoundaries) {
       canvas.drawLine(Offset(b.x.toDouble(), b.y.toDouble()),
@@ -77,7 +104,8 @@ class DataPointsPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(DataPointsPainter oldDelegate) => false;
+  bool shouldRepaint(_DataPointsPainter oldDelegate) => false;
+
   @override
-  bool shouldRebuildSemantics(DataPointsPainter oldDelegate) => false;
+  bool shouldRebuildSemantics(_DataPointsPainter oldDelegate) => false;
 }
