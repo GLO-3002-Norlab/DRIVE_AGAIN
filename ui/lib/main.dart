@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -34,46 +34,51 @@ enum Mode { geofencing, drive }
 
 class _HomeState extends State<Home> {
   bool _running = false;
-  Mode _mode = Mode.geofencing;
+  Mode _mode = Mode.drive; // TODO - set to geofencing
 
-  DataPointsWidget dataPoints = DataPointsWidget(boundaries: const [
+  final DataPointsWidget dataPointsWidget = DataPointsWidget(
+      data: PointsData(boundaries: const [
     Point(0, 0),
-    Point(10, 0),
-    Point(10, 10),
-    Point(0, 10),
-  ]);
-  BotMap botMap = BotMap(fence: const [
+    Point(100, 0),
+    Point(100, 100),
+    Point(0, 100),
+  ]));
+  final BotMap botMap = BotMap(
+      data: BotMapData(fence: const [
     Point(0, 0),
-    Point(10, 0),
-    Point(10, 10),
-    Point(0, 10),
-  ]);
+    Point(100, 0),
+    Point(100, 100),
+    Point(0, 100),
+  ]));
 
   void startPressed() {
     setState(() {
       _running = true;
-      switch (_mode) {
-        case Mode.geofencing:
-          startGeofencing();
-          break;
-        case Mode.drive:
-          startDrive();
-          break;
-      }
     });
-  }
-
-  void startGeofencing() {
-    var random = Random();
-    for (int i = 0; i < 10; i++) {
-      dataPoints.points.add(Point(random.nextInt(10), random.nextInt(10)));
+    switch (_mode) {
+      case Mode.geofencing:
+        startGeofencing();
+        break;
+      case Mode.drive:
+        startDrive();
+        break;
     }
   }
 
-  void startDrive() {
-    print("start drive");
+  void startGeofencing() async {
+    // TODO
+  }
+
+  void startDrive() async {
     var random = Random();
-    botMap.position = Point(random.nextInt(10), random.nextInt(10));
+    while (_running) {
+      botMap.data.setPosition(Point(random.nextInt(100), random.nextInt(100)));
+      for (int i = 0; i < 10; i++) {
+        dataPointsWidget.data
+            .addPoint(Point(random.nextInt(100), random.nextInt(100)));
+      }
+      await Future.delayed(const Duration(seconds: 1));
+    }
   }
 
   void stopPressed() {
@@ -128,7 +133,7 @@ class _HomeState extends State<Home> {
       body: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          dataPoints,
+          dataPointsWidget,
           botMap,
         ],
       ),

@@ -2,17 +2,35 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-class BotMap extends StatefulWidget {
-  final List<Point> fence;
-  Point? position;
+class BotMapData with ChangeNotifier {
+  late final List<Point> _fence;
+  Point? _position;
 
-  BotMap({super.key, required this.fence});
+  BotMapData({required List<Point> fence}) {
+    _fence = fence;
+  }
+
+  void setPosition(Point p) {
+    _position = p;
+    notifyListeners();
+  }
+}
+
+class BotMap extends StatefulWidget {
+  final BotMapData data;
+
+  const BotMap({super.key, required this.data});
 
   @override
   State<BotMap> createState() => _BotMapState();
 }
 
 class _BotMapState extends State<BotMap> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     var sizes = MediaQuery.sizeOf(context);
@@ -22,9 +40,23 @@ class _BotMapState extends State<BotMap> {
       height: size,
       child: Container(
         color: Colors.white,
-        child: CustomPaint(
-          painter: BotPositionPainter(
-              fence: widget.fence, position: widget.position),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Text(
+                "Bot Map",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            Expanded(
+              child: CustomPaint(
+                painter: BotPositionPainter(
+                  widget.data,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -32,10 +64,9 @@ class _BotMapState extends State<BotMap> {
 }
 
 class BotPositionPainter extends CustomPainter {
-  final List<Point> fence;
-  final Point? position;
+  final BotMapData data;
 
-  BotPositionPainter({required this.fence, required this.position});
+  BotPositionPainter(this.data) : super(repaint: data);
 
   List<Point> _transformPoints(
       List<Point> points, List<Point> boundaries, Size size) {
@@ -55,7 +86,7 @@ class BotPositionPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final transformedFence = _transformPoints(fence, fence, size);
+    final transformedFence = _transformPoints(data._fence, data._fence, size);
     var previous = transformedFence.last;
     for (var b in transformedFence) {
       canvas.drawLine(Offset(b.x.toDouble(), b.y.toDouble()),
@@ -63,12 +94,14 @@ class BotPositionPainter extends CustomPainter {
       previous = b;
     }
 
-    print(position);
-    if (position != null) {
-      final transformedPosition = _transformPoints([position!], fence, size)[0];
-      print(transformedPosition);
+    if (data._position != null) {
+      final transformedPosition =
+          _transformPoints([data._position!], data._fence, size)[0];
       canvas.drawCircle(
-          Offset(transformedPosition.x.toDouble(), transformedPosition.y.toDouble()), 4, Paint());
+          Offset(transformedPosition.x.toDouble(),
+              transformedPosition.y.toDouble()),
+          4,
+          Paint());
     }
   }
 
