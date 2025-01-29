@@ -3,12 +3,10 @@ import matplotlib.animation
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
+from robot import Robot
+from common import Command, Pose
 
 WHEEL_BASE = 0.5
-
-Pose = np.ndarray  # x, y, yaw
-Command = np.ndarray  # v_x, omega_z
-
 
 def draw_robot(ax: Axes, pose: Pose) -> None:
     x, y, yaw = pose
@@ -39,7 +37,8 @@ def draw_robot(ax: Axes, pose: Pose) -> None:
     ax.add_artist(right_wheel)
 
 
-def apply_command(u: Command):
+def apply_command(u: Command) -> None:
+    global pose
     x, y, yaw = pose
     v_x, omega_z = u
 
@@ -47,7 +46,7 @@ def apply_command(u: Command):
     y += v_x * np.sin(yaw)
     yaw += omega_z
 
-    return np.array([x, y, yaw])
+    pose = np.array([x, y, yaw])
 
 
 if __name__ == "__main__":
@@ -56,10 +55,20 @@ if __name__ == "__main__":
 
     fig, ax = plt.subplots()
 
+    robot = Robot(pose, apply_command)
+
     def update(frame):
         global pose
-        pose = apply_command(command)
+
+        robot.send_command(command)
+
+        # Simulating localization noise
+        noisy_pose = pose + np.random.normal(0, 0.1, 3)
+        robot.pose_callback(noisy_pose)
+
         draw_robot(ax, pose)
 
-    ani = matplotlib.animation.FuncAnimation(fig, update, frames=200, interval=50)  # type: ignore
+    frequency = 40 # Hz
+    interval_ms = 1000 / frequency
+    ani = matplotlib.animation.FuncAnimation(fig, update, frames=200, interval=interval_ms)  # type: ignore
     plt.show()
