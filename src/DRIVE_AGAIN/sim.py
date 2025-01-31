@@ -1,10 +1,13 @@
+import time
 import matplotlib
 import matplotlib.animation
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
+from DRIVE_AGAIN.drive import Drive
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.common import Command, Pose
+from DRIVE_AGAIN.sampling import RandomSampling
 
 WHEEL_BASE = 0.5
 
@@ -57,11 +60,15 @@ if __name__ == "__main__":
     fig, ax = plt.subplots()
 
     robot = Robot(pose, apply_command)
+    command_sampling_strategy = RandomSampling()
+    drive = Drive(robot, command_sampling_strategy, step_duration_s=3.0)
 
     def update(frame):
         global pose
 
-        robot.send_command(command)
+        timestamp = time.time_ns()
+
+        drive.run(timestamp)
 
         # Simulating localization noise
         noisy_pose = pose + np.random.normal(0, 0.1, 3)
@@ -69,7 +76,7 @@ if __name__ == "__main__":
 
         draw_robot(ax, pose)
 
-    frequency = 40  # Hz
+    frequency = 20  # Hz
     interval_ms = 1000 / frequency
-    ani = matplotlib.animation.FuncAnimation(fig, update, frames=200, interval=interval_ms)  # type: ignore
+    ani = matplotlib.animation.FuncAnimation(fig, update, frames=60, interval=interval_ms)  # type: ignore
     plt.show()
