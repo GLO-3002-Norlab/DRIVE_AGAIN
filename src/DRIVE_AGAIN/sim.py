@@ -4,6 +4,7 @@ from matplotlib.axes import Axes
 import matplotlib.patches
 import matplotlib.pyplot as plt
 import numpy as np
+from DRIVE_AGAIN.keyboard_teleop import KeyboardTeleop
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.common import Command, Pose
 from DRIVE_AGAIN.geofencing import Geofence
@@ -72,7 +73,6 @@ def apply_command(u: Command) -> None:
 
 if __name__ == "__main__":
     pose = np.array([1, 1, np.pi / 2])
-    command = np.array([0.1, 0.1])
 
     fig, ax = plt.subplots()
 
@@ -82,9 +82,12 @@ if __name__ == "__main__":
     origin_coords = (2, 2)
     geofence = Geofence(geofence_coords, origin=origin_coords)
 
+    keyboard_teleop = KeyboardTeleop()
+
     def update(frame):
         global pose
 
+        command = keyboard_teleop.get_command()
         robot.send_command(command)
 
         # Simulating localization noise
