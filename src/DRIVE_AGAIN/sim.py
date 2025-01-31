@@ -89,7 +89,7 @@ if __name__ == "__main__":
     command_sampling_strategy = RandomSampling()
     drive = Drive(robot, command_sampling_strategy, step_duration_s=3.0)
 
-    geofence_coords = [(0, 0), (4, 0), (4, 4), (0, 4)]
+    geofence_coords = [(0.0, 0.0), (4.0, 0.0), (4.0, 4.0), (0.0, 4.0)]
     geofence = Geofence(geofence_coords)
 
     keyboard_teleop = KeyboardTeleop()

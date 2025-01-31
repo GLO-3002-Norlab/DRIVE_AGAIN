@@ -3,7 +3,7 @@ from shapely.geometry import Point, Polygon
 
 
 class Geofence:
-    def __init__(self, coordinates, origin=None):
+    def __init__(self, coordinates: list[tuple[float, float]], origin: tuple[float, float] | None = None):
         """
         Initialize the Geofence with a list of (x, y) coordinates.
         :param coordinates: List of tuples representing the polygon's vertices.
@@ -15,7 +15,7 @@ class Geofence:
         if not self.is_point_inside(self.origin):
             raise ValueError("Origin point is outside the geofence.")
 
-    def is_point_inside(self, point):
+    def is_point_inside(self, point: tuple[float, float]):
         """
         Check if a point is inside the geofence.
         :param point: A tuple (x, y) representing the point.
@@ -25,7 +25,7 @@ class Geofence:
 
 
 if __name__ == "__main__":
-    polygon_coords = [(0, 0), (4, 0), (4, 4), (0, 4)]  # A square
+    polygon_coords = [(0.0, 0.0), (4.0, 0.0), (4.0, 4.0), (0.0, 4.0)]  # A square
     origin_coords = (2, 2)  # Center of the square
     geofence = Geofence(polygon_coords, origin_coords)
 
