@@ -1,8 +1,12 @@
-name: Run formatter
+name: Python application
 
 on: [push]
+
+permissions:
+  contents: read
+
 jobs:
-  format:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -14,8 +18,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install black
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install -e .
       - name: Check proper formatting
         run: |
           black --check --config pyproject.toml .
+      - name: Test with pytest
+        run: |
+          python -m pytest

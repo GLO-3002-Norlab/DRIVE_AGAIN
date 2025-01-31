@@ -4,11 +4,14 @@ version = "0.0.1"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "shapely",
     "numpy>=1.19.5",
     "black",
     "pytest",
     "numpy",
+    "pynput",
+    "matplotlib",
 ]
 
 [tool.black]
-line-length = 90
+line-length = 120
