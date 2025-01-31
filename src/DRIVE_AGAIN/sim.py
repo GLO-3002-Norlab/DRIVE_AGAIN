@@ -53,7 +53,6 @@ def apply_command(u: Command) -> None:
 
 if __name__ == "__main__":
     pose = np.array([1, 1, np.pi / 2])
-    command = np.array([0.1, 0.1])
 
     fig, ax = plt.subplots()
 
@@ -64,16 +63,14 @@ if __name__ == "__main__":
     def update(frame):
         global pose
 
+        command = keyboard_teleop.get_command()
         robot.send_command(command)
-
-        command = :np.quan
 
         # Simulating localization noise
         noisy_pose = pose + np.random.normal(0, 0.1, 3)
         robot.pose_callback(noisy_pose)
 
         draw_robot(ax, pose)
-
 
     frequency = 40  # Hz
     interval_ms = 1000 / frequency

@@ -11,16 +11,8 @@ class KeyboardTeleop:
     s_pressed = False
     d_pressed = False
 
-    command: Command = np.array([0.0, -1.0])
-
     def __init__(self):
-        def key_press_lambda(key: Key | KeyCode | None):
-            self.on_key_press(key)
-
-        def key_release_lambda(key: Key | KeyCode | None):
-            self.on_key_release(key)
-
-        self.keyboard_listener = keyboard.Listener(on_press=key_press_lambda, on_release=key_release_lambda)
+        self.keyboard_listener = keyboard.Listener(on_press=self.on_key_press, on_release=self.on_key_release)
         self.keyboard_listener.start()
 
     def __del__(self):
@@ -30,19 +22,20 @@ class KeyboardTeleop:
         a_x = 0.0
         a_yaw = 0.0
         if self.w_pressed and not self.s_pressed:
-            a_x = 1.0
+            a_x = 0.2
         if self.s_pressed and not self.w_pressed:
-            a_x = -1.0
+            a_x = -0.2
         if self.a_pressed and not self.d_pressed:
-            a_yaw = np.pi / 4
+            a_yaw = np.pi / 16.0
         if self.d_pressed and not self.a_pressed:
-            a_yaw = -np.pi / 4
+            a_yaw = -np.pi / 16.0
 
-        return self.command
+        return np.array([a_x, a_yaw])
 
     def on_key_press(self, key: Key | KeyCode | None):
         if key is None or isinstance(key, Key):
             return
+
         if key.char == "w":
             self.w_pressed = True
         if key.char == "s":
@@ -55,6 +48,7 @@ class KeyboardTeleop:
     def on_key_release(self, key: Key | KeyCode | None):
         if key is None or isinstance(key, Key):
             return
+
         if key.char == "w":
             self.w_pressed = False
         if key.char == "s":
