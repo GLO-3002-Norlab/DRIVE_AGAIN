@@ -11,4 +11,4 @@ dependencies = [
 ]
 
 [tool.black]
-line-length = 90
+line-length = 120
