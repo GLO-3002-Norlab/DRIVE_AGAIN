@@ -1,3 +1,5 @@
+import sys
+import time
 import matplotlib
 import matplotlib.animation
 from matplotlib.axes import Axes
@@ -5,9 +7,11 @@ import matplotlib.patches
 import matplotlib.pyplot as plt
 import numpy as np
 from DRIVE_AGAIN.keyboard_teleop import KeyboardTeleop
+from DRIVE_AGAIN.drive import Drive
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.common import Command, Pose
 from DRIVE_AGAIN.geofencing import Geofence
+from DRIVE_AGAIN.sampling import RandomSampling
 
 WHEEL_BASE = 0.5
 
@@ -72,23 +76,35 @@ def apply_command(u: Command) -> None:
 
 
 if __name__ == "__main__":
+    is_teleop = True
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "drive":
+            is_teleop = False
+
     pose = np.array([1, 1, np.pi / 2])
 
     fig, ax = plt.subplots()
 
     robot = Robot(pose, apply_command)
+    command_sampling_strategy = RandomSampling()
+    drive = Drive(robot, command_sampling_strategy, step_duration_s=3.0)
 
     geofence_coords = [(0, 0), (4, 0), (4, 4), (0, 4)]
-    origin_coords = (2, 2)
-    geofence = Geofence(geofence_coords, origin=origin_coords)
+    geofence = Geofence(geofence_coords)
 
     keyboard_teleop = KeyboardTeleop()
 
     def update(frame):
         global pose
 
-        command = keyboard_teleop.get_command()
-        robot.send_command(command)
+        timestamp = time.time_ns()
+
+        command = None
+        if is_teleop:
+            command = keyboard_teleop.get_command()
+            robot.send_command(command)
+        else:
+            drive.run(timestamp)
 
         # Simulating localization noise
         noisy_pose = pose + np.random.normal(0, 0.1, 3)
@@ -100,7 +116,7 @@ if __name__ == "__main__":
         draw_geofence(ax, geofence)
         draw_robot(ax, pose, geofence)
 
-    frequency = 40  # Hz
+    frequency = 20  # Hz
     interval_ms = 1000 / frequency
     ani = matplotlib.animation.FuncAnimation(fig, update, frames=60, interval=interval_ms)  # type: ignore
     plt.show()

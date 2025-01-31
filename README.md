@@ -18,7 +18,8 @@ python -m pytest
 ## Run sim
 
 ```sh
-python src/DRIVE_AGAIN/sim.py
+python src/DRIVE_AGAIN/sim.py # Keyboard teleop mode
+python src/DRIVE_AGAIN/sim.py drive # Drive protocol
 ```
 
 ## UI setup

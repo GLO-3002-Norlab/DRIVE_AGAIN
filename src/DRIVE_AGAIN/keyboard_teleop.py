@@ -19,18 +19,18 @@ class KeyboardTeleop:
         self.keyboard_listener.join()
 
     def get_command(self) -> Command:
-        a_x = 0.0
-        a_yaw = 0.0
+        v_x = 0.0
+        v_yaw = 0.0
         if self.w_pressed and not self.s_pressed:
-            a_x = 0.2
+            v_x = 0.2
         if self.s_pressed and not self.w_pressed:
-            a_x = -0.2
+            v_x = -0.2
         if self.a_pressed and not self.d_pressed:
-            a_yaw = np.pi / 16.0
+            v_yaw = np.pi / 16.0
         if self.d_pressed and not self.a_pressed:
-            a_yaw = -np.pi / 16.0
+            v_yaw = -np.pi / 16.0
 
-        return np.array([a_x, a_yaw])
+        return np.array([v_x, v_yaw])
 
     def on_key_press(self, key: Key | KeyCode | None):
         if key is None or isinstance(key, Key):
