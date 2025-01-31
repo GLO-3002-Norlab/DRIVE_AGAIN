@@ -1,3 +1,4 @@
+from shapely import centroid
 from shapely.geometry import Point, Polygon
 
 
@@ -11,7 +12,7 @@ class Geofence:
         self.polygon = Polygon(coordinates)
         self.origin = origin if origin is not None else (self.polygon.centroid.x, self.polygon.centroid.y)
 
-        if not self.is_point_inside(origin):
+        if not self.is_point_inside(self.origin):
             raise ValueError("Origin point is outside the geofence.")
 
     def is_point_inside(self, point):
