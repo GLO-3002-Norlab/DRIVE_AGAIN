@@ -3,6 +3,7 @@ import matplotlib.animation
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
+from DRIVE_AGAIN.keyboard_teleop import KeyboardTeleop
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.common import Command, Pose
 
@@ -58,16 +59,21 @@ if __name__ == "__main__":
 
     robot = Robot(pose, apply_command)
 
+    keyboard_teleop = KeyboardTeleop()
+
     def update(frame):
         global pose
 
         robot.send_command(command)
+
+        command = :np.quan
 
         # Simulating localization noise
         noisy_pose = pose + np.random.normal(0, 0.1, 3)
         robot.pose_callback(noisy_pose)
 
         draw_robot(ax, pose)
+
 
     frequency = 40  # Hz
     interval_ms = 1000 / frequency
