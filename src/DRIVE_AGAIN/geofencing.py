@@ -1,12 +1,18 @@
 from shapely.geometry import Point, Polygon
 
+
 class Geofence:
-    def __init__(self, coordinates):
+    def __init__(self, coordinates, origin):
         """
         Initialize the Geofence with a list of (x, y) coordinates.
         :param coordinates: List of tuples representing the polygon's vertices.
+        :param origin: Tuples representing the point of origin to return to when out of bounds.
         """
         self.polygon = Polygon(coordinates)
+        self.origin = origin
+
+        if not self.is_point_inside(origin):
+            raise ValueError("Origin point is outside the geofence.")
 
     def is_point_inside(self, point):
         """
@@ -16,9 +22,11 @@ class Geofence:
         """
         return self.polygon.contains(Point(point))
 
+
 if __name__ == "__main__":
     polygon_coords = [(0, 0), (4, 0), (4, 4), (0, 4)]  # A square
-    geofence = Geofence(polygon_coords)
+    origin_coords = (2, 2) # Center of the square
+    geofence = Geofence(polygon_coords, origin_coords)
     
     test_points = [(2, 2), (5, 5), (3, 3), (-1, -1)]
     
