@@ -1,9 +1,12 @@
+import sys
 import time
+from typing import Literal
 import matplotlib
 import matplotlib.animation
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
+from DRIVE_AGAIN.keyboard_teleop import KeyboardTeleop
 from DRIVE_AGAIN.drive import Drive
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.common import Command, Pose
@@ -54,8 +57,12 @@ def apply_command(u: Command) -> None:
 
 
 if __name__ == "__main__":
+    is_teleop = True
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "drive":
+            is_teleop = False
+
     pose = np.array([1, 1, np.pi / 2])
-    command = np.array([0.1, 0.1])
 
     fig, ax = plt.subplots()
 
@@ -63,12 +70,19 @@ if __name__ == "__main__":
     command_sampling_strategy = RandomSampling()
     drive = Drive(robot, command_sampling_strategy, step_duration_s=3.0)
 
+    keyboard_teleop = KeyboardTeleop()
+
     def update(frame):
         global pose
 
         timestamp = time.time_ns()
 
-        drive.run(timestamp)
+        command = None
+        if is_teleop:
+            command = keyboard_teleop.get_command()
+            robot.send_command(command)
+        else:
+            drive.run(timestamp)
 
         # Simulating localization noise
         noisy_pose = pose + np.random.normal(0, 0.1, 3)
