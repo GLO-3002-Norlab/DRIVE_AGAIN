@@ -3,10 +3,11 @@ import matplotlib.animation
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
-from robot import Robot
-from common import Command, Pose
+from DRIVE_AGAIN.robot import Robot
+from DRIVE_AGAIN.common import Command, Pose
 
 WHEEL_BASE = 0.5
+
 
 def draw_robot(ax: Axes, pose: Pose) -> None:
     x, y, yaw = pose
@@ -68,7 +69,7 @@ if __name__ == "__main__":
 
         draw_robot(ax, pose)
 
-    frequency = 40 # Hz
+    frequency = 40  # Hz
     interval_ms = 1000 / frequency
     ani = matplotlib.animation.FuncAnimation(fig, update, frames=200, interval=interval_ms)  # type: ignore
     plt.show()
