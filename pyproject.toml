@@ -10,7 +10,7 @@ dependencies = [
     "pytest",
     "numpy",
     "pynput",
-    "matplotlib",
+    "matplotlib<3.10",
 ]
 
 [tool.black]
