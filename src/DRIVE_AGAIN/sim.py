@@ -10,8 +10,9 @@ from DRIVE_AGAIN.keyboard_teleop import KeyboardTeleop
 from DRIVE_AGAIN.drive import Drive
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.common import Command, Pose
-from DRIVE_AGAIN.geofencing import Geofence
+from DRIVE_AGAIN.geofencing import Geofence, GeofencingController
 from DRIVE_AGAIN.sampling import RandomSampling
+
 
 WHEEL_BASE = 0.5
 
@@ -91,6 +92,7 @@ if __name__ == "__main__":
 
     geofence_coords = [(0.0, 0.0), (4.0, 0.0), (4.0, 4.0), (0.0, 4.0)]
     geofence = Geofence(geofence_coords)
+    geofencing_controller = GeofencingController(geofence)
 
     keyboard_teleop = KeyboardTeleop()
 
@@ -99,9 +101,13 @@ if __name__ == "__main__":
 
         timestamp = time.time_ns()
 
-        command = None
+        geofencing_controller.update(pose)
+
         if is_teleop:
             command = keyboard_teleop.get_command()
+            robot.send_command(command)
+        elif geofencing_controller.override:
+            command = geofencing_controller.get_command(pose)
             robot.send_command(command)
         else:
             drive.run(timestamp)
@@ -118,5 +124,5 @@ if __name__ == "__main__":
 
     frequency = 20  # Hz
     interval_ms = 1000 / frequency
-    ani = matplotlib.animation.FuncAnimation(fig, update, frames=60, interval=interval_ms)  # type: ignore
+    ani = matplotlib.animation.FuncAnimation(fig, update, frames=30, interval=interval_ms)  # type: ignore
     plt.show()
