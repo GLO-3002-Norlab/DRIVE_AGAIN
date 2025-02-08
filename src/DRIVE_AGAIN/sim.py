@@ -1,5 +1,8 @@
 import sys
+import io
+import base64
 import time
+from time import sleep
 import matplotlib
 import matplotlib.animation
 from matplotlib.axes import Axes
@@ -12,111 +15,119 @@ from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.common import Command, Pose
 from DRIVE_AGAIN.geofencing import Geofence
 from DRIVE_AGAIN.sampling import RandomSampling
+from DRIVE_AGAIN.server import Server
+import threading
 
 WHEEL_BASE = 0.5
 
 
-def draw_robot(ax: Axes, pose: Pose, geofence: Geofence) -> None:
-    x, y, yaw = pose
+class Sim:
+    def __init__(self, server: Server, is_teleop: bool):
+        plt.switch_backend("Agg")
 
-    robot_color = "green" if geofence.is_point_inside((x, y)) else "red"
-    circle = matplotlib.patches.Circle((x, y), WHEEL_BASE / 2, color=robot_color)
+        self.is_teleop = is_teleop
+        self.server: Server = server
 
-    wheel_width = 0.1
-    wheel_height = WHEEL_BASE * 0.8
+        self.pose = np.array([1, 1, np.pi / 2])
+        self.robot = Robot(self.pose, self.apply_command)
 
-    left_wheel_x = x - WHEEL_BASE / 2 - wheel_width
-    left_wheel_y = y - wheel_height / 2
+        command_sampling_strategy = RandomSampling()
+        self.drive = Drive(self.robot, command_sampling_strategy, step_duration_s=3.0)
 
-    right_wheel_x = x + WHEEL_BASE / 2
-    right_wheel_y = y - wheel_height / 2
+        geofence_coords = [(0.0, 0.0), (4.0, 0.0), (4.0, 4.0), (0.0, 4.0)]
+        self.geofence = Geofence(geofence_coords)
 
-    wheel_rotation_deg = np.rad2deg(yaw) + 90
-    left_wheel = matplotlib.patches.Rectangle(
-        (left_wheel_x, left_wheel_y),
-        wheel_width,
-        wheel_height,
-        rotation_point=(x, y),
-        angle=wheel_rotation_deg,
-        color="black",
-    )
-    right_wheel = matplotlib.patches.Rectangle(
-        (right_wheel_x, right_wheel_y),
-        wheel_width,
-        wheel_height,
-        rotation_point=(x, y),
-        angle=wheel_rotation_deg,
-        color="black",
-    )
+        self.keyboard_teleop = KeyboardTeleop()
+        frequency = 20  # Hz
+        self.sim_update_interval = 1000 / frequency
 
-    ax.add_patch(circle)
-    ax.add_patch(left_wheel)
-    ax.add_patch(right_wheel)
+    def run(self):
+        self.fig, self.ax = plt.subplots()
 
+        def update():
+            timestamp = time.time_ns()
 
-def draw_geofence(ax: Axes, geofence: Geofence) -> None:
-    geofence_coords = np.array(geofence.polygon.exterior.coords)
-    polygon = matplotlib.patches.Polygon(
-        geofence_coords, closed=True, edgecolor="blue", facecolor="none", lw=1, linestyle=":"
-    )
+            command = None
+            if self.is_teleop:
+                command = self.keyboard_teleop.get_command()
+                self.robot.send_command(command)
+            else:
+                self.drive.run(timestamp)
 
-    ax.add_patch(polygon)
+            # Clear the figure before drawing new content
+            self.ax.clear()
+            self.ax.set_xlim(-5, 5)
+            self.ax.set_ylim(-5, 5)
+            self.draw_geofence(self.ax, self.geofence)
+            self.draw_robot(self.ax, self.pose, self.geofence)
 
+            img_buffer = io.BytesIO()
+            self.fig.savefig(img_buffer, format="png")  # Save figure to buffer
 
-def apply_command(u: Command) -> None:
-    global pose
-    x, y, yaw = pose
-    v_x, omega_z = u
+            # Encode as base64
+            img_base64 = base64.b64encode(img_buffer.getvalue()).decode("utf-8")
 
-    x += v_x * np.cos(yaw)
-    y += v_x * np.sin(yaw)
-    yaw += omega_z
+            self.server.update_input_space(img_base64)
+            self.server.update_robot_viz(img_base64)
 
-    pose = np.array([x, y, yaw])
+        print("Simulation started!")  # Debugging output
 
+        # Replace FuncAnimation with a manual loop
+        while True:
+            update()
+            time.sleep(self.sim_update_interval / 1000.0)  # Convert ms to seconds
 
-if __name__ == "__main__":
-    is_teleop = True
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "drive":
-            is_teleop = False
+    def draw_robot(self, ax: Axes, pose: Pose, geofence: Geofence) -> None:
+        x, y, yaw = pose
 
-    pose = np.array([1, 1, np.pi / 2])
+        robot_color = "green" if geofence.is_point_inside((x, y)) else "red"
+        circle = matplotlib.patches.Circle((x, y), WHEEL_BASE / 2, color=robot_color)
 
-    fig, ax = plt.subplots()
+        wheel_width = 0.1
+        wheel_height = WHEEL_BASE * 0.8
 
-    robot = Robot(pose, apply_command)
-    command_sampling_strategy = RandomSampling()
-    drive = Drive(robot, command_sampling_strategy, step_duration_s=3.0)
+        left_wheel_x = x - WHEEL_BASE / 2 - wheel_width
+        left_wheel_y = y - wheel_height / 2
 
-    geofence_coords = [(0.0, 0.0), (4.0, 0.0), (4.0, 4.0), (0.0, 4.0)]
-    geofence = Geofence(geofence_coords)
+        right_wheel_x = x + WHEEL_BASE / 2
+        right_wheel_y = y - wheel_height / 2
 
-    keyboard_teleop = KeyboardTeleop()
+        wheel_rotation_deg = np.rad2deg(yaw) + 90
+        left_wheel = matplotlib.patches.Rectangle(
+            (left_wheel_x, left_wheel_y),
+            wheel_width,
+            wheel_height,
+            rotation_point=(x, y),
+            angle=wheel_rotation_deg,
+            color="black",
+        )
+        right_wheel = matplotlib.patches.Rectangle(
+            (right_wheel_x, right_wheel_y),
+            wheel_width,
+            wheel_height,
+            rotation_point=(x, y),
+            angle=wheel_rotation_deg,
+            color="black",
+        )
 
-    def update(frame):
-        global pose
+        ax.add_patch(circle)
+        ax.add_patch(left_wheel)
+        ax.add_patch(right_wheel)
 
-        timestamp = time.time_ns()
+    def draw_geofence(self, ax: Axes, geofence: Geofence) -> None:
+        geofence_coords = np.array(geofence.polygon.exterior.coords)
+        polygon = matplotlib.patches.Polygon(
+            geofence_coords, closed=True, edgecolor="blue", facecolor="none", lw=1, linestyle=":"
+        )
 
-        command = None
-        if is_teleop:
-            command = keyboard_teleop.get_command()
-            robot.send_command(command)
-        else:
-            drive.run(timestamp)
+        ax.add_patch(polygon)
 
-        # Simulating localization noise
-        noisy_pose = pose + np.random.normal(0, 0.1, 3)
-        robot.pose_callback(noisy_pose)
+    def apply_command(self, u: Command) -> None:
+        x, y, yaw = self.pose
+        v_x, omega_z = u
 
-        ax.clear()
-        ax.set_xlim(-5, 5)
-        ax.set_ylim(-5, 5)
-        draw_geofence(ax, geofence)
-        draw_robot(ax, pose, geofence)
+        x += v_x * np.cos(yaw)
+        y += v_x * np.sin(yaw)
+        yaw += omega_z
 
-    frequency = 20  # Hz
-    interval_ms = 1000 / frequency
-    ani = matplotlib.animation.FuncAnimation(fig, update, frames=60, interval=interval_ms)  # type: ignore
-    plt.show()
+        self.pose = np.array([x, y, yaw])

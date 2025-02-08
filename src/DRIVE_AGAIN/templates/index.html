@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRIVE AGAIN</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+    <!-- <script src="https://unpkg.com/@tailwindcss/browser@4"></script> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+</head>
+<body>
+    <h1>DRIVE</h1>
+    <button onclick="startDrive()">Start DRIVE</button>
+    <br>
+    <button onclick="startGeofencing()">Start geofencing</button>
+    <br>
+    <button onclick="stopGeofencing()">Stop geofencing</button>
+    <br>
+    <img id="robot_viz" width="600">
+    <img id="input_space" width="600">
+
+    <script>
+        const socket = io();
+
+
+        function startGeofencing() {
+            socket.emit("start_geofencing");
+        }
+
+        function stopGeofencing() {
+            socket.emit("stop_geofencing");
+        }
+
+        function startDrive() {
+            socket.emit("start_drive");
+        }
+
+        socket.on("input_space_update", (data) => {
+            const imgData = data.image_data;
+            document.getElementById("input_space").src = `data:image/png;base64,${imgData}`;
+        });
+
+        socket.on("robot_vizualisation_update", (data) => {
+            const imgData = data.image_data;
+            document.getElementById("robot_viz").src = `data:image/png;base64,${imgData}`;
+        });
+    </script>
+</body>
+</html>
