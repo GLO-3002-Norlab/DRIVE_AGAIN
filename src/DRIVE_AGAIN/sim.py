@@ -39,43 +39,43 @@ class Sim:
 
         self.keyboard_teleop = KeyboardTeleop()
         frequency = 20  # Hz
-        self.sim_update_interval = 1000 / frequency
+        self.sim_update_interval = 1 / frequency
+
+    def draw_robot_visualization_figure(self, fig, ax):
+        ax.clear()
+        ax.set_xlim(-5, 5)
+        ax.set_ylim(-5, 5)
+        self.draw_geofence(ax, self.geofence)
+        self.draw_robot(ax, self.pose, self.geofence)
+
+        return fig
+
+    def encode_fig_to_b64(self, fig):
+        buffer = io.BytesIO()
+        fig.savefig(buffer, format="png")
+        return base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+    def update(self, fig_viz, ax_viz):
+        timestamp = time.time_ns()
+
+        command = None
+        if self.is_teleop:
+            command = self.keyboard_teleop.get_command(timestamp)
+            self.robot.send_command(command)
+        else:
+            self.drive.run(timestamp)
+
+        fig = self.draw_robot_visualization_figure(fig_viz, ax_viz)
+        img_base64 = self.encode_fig_to_b64(fig)
+
+        self.server.update_input_space(img_base64)
+        self.server.update_robot_viz(img_base64)
 
     def run(self):
-        self.fig, self.ax = plt.subplots()
-
-        def update():
-            timestamp = time.time_ns()
-
-            command = None
-            if self.is_teleop:
-                command = self.keyboard_teleop.get_command()
-                self.robot.send_command(command)
-            else:
-                self.drive.run(timestamp)
-
-            # Clear the figure before drawing new content
-            self.ax.clear()
-            self.ax.set_xlim(-5, 5)
-            self.ax.set_ylim(-5, 5)
-            self.draw_geofence(self.ax, self.geofence)
-            self.draw_robot(self.ax, self.pose, self.geofence)
-
-            img_buffer = io.BytesIO()
-            self.fig.savefig(img_buffer, format="png")  # Save figure to buffer
-
-            # Encode as base64
-            img_base64 = base64.b64encode(img_buffer.getvalue()).decode("utf-8")
-
-            self.server.update_input_space(img_base64)
-            self.server.update_robot_viz(img_base64)
-
-        print("Simulation started!")  # Debugging output
-
-        # Replace FuncAnimation with a manual loop
+        fig_viz, ax_viz = plt.subplots()
         while True:
-            update()
-            time.sleep(self.sim_update_interval / 1000.0)  # Convert ms to seconds
+            self.update(fig_viz, ax_viz)
+            time.sleep(self.sim_update_interval)
 
     def draw_robot(self, ax: Axes, pose: Pose, geofence: Geofence) -> None:
         x, y, yaw = pose

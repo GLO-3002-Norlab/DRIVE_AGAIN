@@ -15,11 +15,9 @@ class Server:
         self.socketio.run(self.app, debug=True)
 
     def update_robot_viz(self, robot_viz_image_b64):
-        print("update_robot_viz:")
         self.socketio.emit("robot_vizualisation_update", {"image_data": robot_viz_image_b64})
 
     def update_input_space(self, input_space_image_b64):
-        print("update_input_space:")
         self.socketio.emit("update_input_space", {"image_data": input_space_image_b64})
 
     def create_server(self):
