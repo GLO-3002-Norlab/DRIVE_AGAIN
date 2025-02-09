@@ -41,21 +41,19 @@ class Sim:
         frequency = 20  # Hz
         self.sim_update_interval = 1 / frequency
 
-    def draw_robot_visualization_figure(self, fig, ax):
+    def draw_robot_visualization_figure(self, ax) -> None:
         ax.clear()
         ax.set_xlim(-5, 5)
         ax.set_ylim(-5, 5)
         self.draw_geofence(ax, self.geofence)
         self.draw_robot(ax, self.pose, self.geofence)
 
-        return fig
-
     def encode_fig_to_b64(self, fig):
         buffer = io.BytesIO()
         fig.savefig(buffer, format="png")
         return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
-    def update(self, fig_viz, ax_viz):
+    def update(self, fig_viz, ax_viz, fig_input_space, ax_input_space):
         timestamp = time.time_ns()
 
         command = None
@@ -65,17 +63,33 @@ class Sim:
         else:
             self.drive.run(timestamp)
 
-        fig = self.draw_robot_visualization_figure(fig_viz, ax_viz)
-        img_base64 = self.encode_fig_to_b64(fig)
+        self.draw_robot_visualization_figure(ax_viz)
+        viz_b64 = self.encode_fig_to_b64(fig_viz)
 
-        self.server.update_input_space(img_base64)
-        self.server.update_robot_viz(img_base64)
+        self.draw_input_space(ax_input_space)
+        input_space_b64 = self.encode_fig_to_b64(fig_input_space)
+
+        self.server.update_robot_viz(viz_b64)
+        self.server.update_input_space(input_space_b64)
 
     def run(self):
         fig_viz, ax_viz = plt.subplots()
+        fig_input_space, ax_input_space = plt.subplots()
         while True:
-            self.update(fig_viz, ax_viz)
+            self.update(fig_viz, ax_viz, fig_input_space, ax_input_space)
             time.sleep(self.sim_update_interval)
+
+    def draw_input_space(self, ax: Axes) -> None:
+        commands = self.drive.get_commands()
+
+        ax.clear()
+        ax.set_xlim(-1, 1)
+        ax.set_ylim(0, 0.2)
+
+        ax.set_xlabel("v_yaw")
+        ax.set_ylabel("v_x")
+        ax.set_title("Input space")
+        ax.scatter(commands[:, 1], commands[:, 0])
 
     def draw_robot(self, ax: Axes, pose: Pose, geofence: Geofence) -> None:
         x, y, yaw = pose

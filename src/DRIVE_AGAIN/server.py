@@ -18,7 +18,7 @@ class Server:
         self.socketio.emit("robot_vizualisation_update", {"image_data": robot_viz_image_b64})
 
     def update_input_space(self, input_space_image_b64):
-        self.socketio.emit("update_input_space", {"image_data": input_space_image_b64})
+        self.socketio.emit("input_space_update", {"image_data": input_space_image_b64})
 
     def create_server(self):
         app = Flask(__name__)
