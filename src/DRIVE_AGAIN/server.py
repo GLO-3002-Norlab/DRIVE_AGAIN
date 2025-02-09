@@ -8,8 +8,8 @@ import threading
 
 
 class Server:
-    def __init__(self):
-        self.app, self.socketio = self.create_server()
+    def __init__(self, start_drive_cb, start_geofencing_cb, stop_geofencing_cb):
+        self.app, self.socketio = self.create_server(start_drive_cb, start_geofencing_cb, stop_geofencing_cb)
 
     def run(self):
         self.socketio.run(self.app, debug=True)
@@ -20,7 +20,7 @@ class Server:
     def update_input_space(self, input_space_image_b64):
         self.socketio.emit("input_space_update", {"image_data": input_space_image_b64})
 
-    def create_server(self):
+    def create_server(self, start_drive_cb, start_geofencing_cb, stop_geofencing_cb):
         app = Flask(__name__)
         socketio = SocketIO(app)
 
@@ -30,14 +30,14 @@ class Server:
 
         @socketio.on("start_drive")
         def start_drive():
-            print("Starting drive")
+            start_drive_cb()
 
         @socketio.on("start_geofencing")
         def start_geofencing():
-            print("Starting geofence")
+            start_geofencing_cb()
 
         @socketio.on("stop_geofencing")
         def stop_geofencing():
-            print("Stop geofence")
+            stop_geofencing_cb()
 
         return app, socketio

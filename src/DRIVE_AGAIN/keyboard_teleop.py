@@ -21,6 +21,9 @@ class KeyboardTeleop:
         self.v_yaw = 0.0
         self.last_timestamp_ns: None | float = None
 
+    def is_active(self):
+        return self.w_pressed or self.a_pressed or self.s_pressed or self.d_pressed
+
     def __del__(self):
         self.keyboard_listener.join()
 

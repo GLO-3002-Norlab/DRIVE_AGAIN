@@ -1,31 +1,29 @@
-import sys
-import io
 import base64
+import io
 import time
-from time import sleep
+
 import matplotlib
 import matplotlib.animation
-from matplotlib.axes import Axes
 import matplotlib.patches
 import matplotlib.pyplot as plt
 import numpy as np
-from DRIVE_AGAIN.keyboard_teleop import KeyboardTeleop
-from DRIVE_AGAIN.drive import Drive
-from DRIVE_AGAIN.robot import Robot
+from matplotlib.axes import Axes
+
 from DRIVE_AGAIN.common import Command, Pose
-from DRIVE_AGAIN.geofencing import Geofence
+from DRIVE_AGAIN.drive import Drive
+from DRIVE_AGAIN.geofencing import Geofence, GeofencingController
+from DRIVE_AGAIN.keyboard_teleop import KeyboardTeleop
+from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.sampling import RandomSampling
 from DRIVE_AGAIN.server import Server
-import threading
 
 WHEEL_BASE = 0.5
 
 
 class Sim:
-    def __init__(self, server: Server, is_teleop: bool):
+    def __init__(self, server: Server):
         plt.switch_backend("Agg")
 
-        self.is_teleop = is_teleop
         self.server: Server = server
 
         self.pose = np.array([1, 1, np.pi / 2])
@@ -36,6 +34,7 @@ class Sim:
 
         geofence_coords = [(0.0, 0.0), (4.0, 0.0), (4.0, 4.0), (0.0, 4.0)]
         self.geofence = Geofence(geofence_coords)
+        self.geofencing_controller = GeofencingController(self.geofence)
 
         self.keyboard_teleop = KeyboardTeleop()
         frequency = 20  # Hz
@@ -56,9 +55,14 @@ class Sim:
     def update(self, fig_viz, ax_viz, fig_input_space, ax_input_space):
         timestamp = time.time_ns()
 
+        self.geofencing_controller.update(self.pose)
+
         command = None
-        if self.is_teleop:
+        if self.keyboard_teleop.is_active():
             command = self.keyboard_teleop.get_command(timestamp)
+            self.robot.send_command(command)
+        elif self.geofencing_controller.override:
+            command = self.geofencing_controller.get_command(self.pose)
             self.robot.send_command(command)
         else:
             self.drive.run(timestamp)

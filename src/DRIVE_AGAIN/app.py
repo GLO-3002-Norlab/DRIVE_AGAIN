@@ -4,14 +4,21 @@ from sim import Sim
 import sys
 
 
-def main():
-    is_teleop = True
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "drive":
-            is_teleop = False
+def start_drive_cb():
+    print("starting drive")
 
-    server = Server()
-    sim = Sim(server, is_teleop)
+
+def start_geofence_cb():
+    print("starting geofence")
+
+
+def stop_geofence_cb():
+    print("stopping geofence")
+
+
+def main():
+    server = Server(start_drive_cb, start_geofence_cb, stop_geofence_cb)
+    sim = Sim(server)
 
     sim_thread = Thread(target=sim.run)
     sim_thread.start()
