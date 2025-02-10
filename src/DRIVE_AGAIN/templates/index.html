@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRIVE AGAIN</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+</head>
+<body>
+    <div>
+        <button id="mainButton" onclick="handleButtonClick()">Start Geofencing</button>
+        <div class="image-container">
+            <img id="robot_viz">
+            <img id="input_space">
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let stage = 0;
+
+        function handleButtonClick() {
+            const button = document.getElementById("mainButton");
+            
+            if (stage === 0) {
+                socket.emit("start_geofencing");
+                button.textContent = "Stop Geofencing";
+            } else if (stage === 1) {
+                socket.emit("stop_geofencing");
+                button.textContent = "Start DRIVE";
+            } else if (stage === 2) {
+                socket.emit("start_drive");
+                button.textContent = "Drive Started";
+                button.disabled = true;
+            }
+            
+            stage++;
+        }
+
+        socket.on("input_space_update", (data) => {
+            document.getElementById("input_space").src = `data:image/png;base64,${data.image_data}`;
+        });
+
+        socket.on("robot_vizualisation_update", (data) => {
+            document.getElementById("robot_viz").src = `data:image/png;base64,${data.image_data}`;
+        });
+    </script>
+    <style>
+        body {
+            margin: 2rem;
+            padding: 0;
+            max-width: 100%;
+        }
+        .image-container {
+            margin-top: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            max-width: 100%;
+        }
+        .image-container img {
+            flex: 1;
+            width: 100%;
+        }
+
+        @media (max-width: 600px) {
+            .image-container {
+                flex-direction: column;
+            }
+        }
+
+        #mainButton {
+            width: 100%;
+            max-width: 100%;
+        }
+    </style>
+</body>
+</html>
