@@ -1,7 +1,7 @@
 from DRIVE_AGAIN.server import Server
 from threading import Thread
 from sim import Sim
-import sys
+import matplotlib.pyplot as plt
 
 
 def start_drive_cb():
@@ -17,6 +17,7 @@ def stop_geofence_cb():
 
 
 def main():
+    plt.switch_backend("Agg")
     server = Server(start_drive_cb, start_geofence_cb, stop_geofence_cb)
     sim = Sim(server)
 
