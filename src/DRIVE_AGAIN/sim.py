@@ -1,4 +1,6 @@
 import base64
+import matplotlib.pyplot as plt
+from DRIVE_AGAIN.common import Command
 import io
 import time
 from DRIVE_AGAIN.plot import draw_input_space, draw_robot_visualization_figure
