@@ -40,6 +40,7 @@ class Drive:
             return
 
         if timestamp_ns - self.current_step.start_timestamp_ns > self.step_duration_s * 1e9:  # type: ignore
+            self.save_step()
             self._new_step(self.next_command, timestamp_ns)
 
         self.robot.send_command(self.current_step.command)  # type: ignore
