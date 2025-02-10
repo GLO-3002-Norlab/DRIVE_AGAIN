@@ -24,7 +24,9 @@ def draw_input_space(ax: Axes, commands: np.ndarray) -> None:
     ax.set_xlabel("v_yaw")
     ax.set_ylabel("v_x")
     ax.set_title("Input space")
-    ax.scatter(commands[:, 1], commands[:, 0])
+
+    if len(commands) > 0:
+        ax.scatter(commands[:, 1], commands[:, 0])
 
 
 def draw_robot(ax: Axes, pose: Pose, geofence: Geofence, wheel_base: float) -> None:
