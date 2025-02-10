@@ -9,12 +9,12 @@ V_YAW_MAX = np.pi
 
 
 class KeyboardTeleop:
-    w_pressed = False # Forward
-    a_pressed = False # Left
-    s_pressed = False # Backward
-    d_pressed = False # Right
+    w_pressed = False  # Forward
+    a_pressed = False  # Left
+    s_pressed = False  # Backward
+    d_pressed = False  # Right
 
-    x_pressed = False # Deadman switch
+    x_pressed = False  # Deadman switch
 
     def __init__(self):
         self.keyboard_listener = keyboard.Listener(on_press=self.on_key_press, on_release=self.on_key_release)

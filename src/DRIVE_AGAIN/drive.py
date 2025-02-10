@@ -25,7 +25,7 @@ class Drive:
     def start(self, timestamp_ns: float):
         if self.current_step is not None:
             return
-        
+
         self._new_step(self.next_command, timestamp_ns)
 
     def pause(self):
@@ -52,7 +52,7 @@ class Drive:
         if self.current_step is None:
             print("No step to save!")
             return
-        
+
         print("Step completed! Saving step data...")
         self.commands.append(self.current_step.command)
 
