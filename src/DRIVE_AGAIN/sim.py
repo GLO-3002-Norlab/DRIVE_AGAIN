@@ -53,6 +53,7 @@ class Sim:
             self.robot.send_command(command)
         elif self.geofencing_controller.override:
             command = self.geofencing_controller.get_command(self.pose)
+            self.drive.pause()
             self.robot.send_command(command)
         else:
             self.drive.run(timestamp)

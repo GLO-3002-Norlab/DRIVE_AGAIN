@@ -56,6 +56,6 @@ class Drive:
         self.commands.append(self.current_step.command)
 
     def _new_step(self, command: Command, timestamp_ns: float):
-        print("Sampling next command")
+        print(f"Starting step with command: {command}")
         self.current_step = Step(command, timestamp_ns)
         self.next_command = self.command_sampling.sample_command()
