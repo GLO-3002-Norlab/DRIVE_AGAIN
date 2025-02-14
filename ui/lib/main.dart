@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:js_interop';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ui/bot_map.dart';
 import 'package:ui/data_points.dart';
+import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:convert' as json;
 
@@ -56,14 +58,11 @@ class _HomeState extends State<Home> {
     Point(100, 100),
     Point(0, 100),
   ]));
-  final WebSocketChannel channel =
-      WebSocketChannel.connect(Uri.parse('ws://localhost:8000'));
+  WebSocketChannel? channel;
 
   @override
   void initState() {
     super.initState();
-
-    listenOnWebSocket();
   }
 
   void handleMessage(DriveSocketMessage message) {
@@ -89,15 +88,19 @@ class _HomeState extends State<Home> {
       case MessageType.data:
         // TODO
         break;
+      case MessageType.files:
+        // TODO
+        break;
     }
   }
 
   Future<void> listenOnWebSocket() async {
     try {
-      await channel.ready;
+      channel ??= WebSocketChannel.connect(Uri.parse('ws://localhost:5000'));
+      await channel!.ready;
       print("Channel is connected");
 
-      channel.stream.listen((value) async {
+      channel!.stream.listen((value) async {
         print("Received event: [$value]");
         DriveSocketMessage message =
             DriveSocketMessage.fromJson(json.jsonDecode(value));
@@ -105,21 +108,27 @@ class _HomeState extends State<Home> {
       }).onDone(() {
         print("Channel disconnected");
       });
+    } on WebSocketChannelException {
+      print("error on connect!!");
     } on SocketException {
-      if (kDebugMode) {
-        print("Failed to connect to socket");
-      }
+      // if (kDebugMode) {
+      print("Failed to connect to socket");
+      // }
     }
-    return;
+    // if (channel != null) {
+    // try {}
+    // }
+    // return;
   }
 
   void startPressed() {
-    // var message =
-    //     DriveSocketMessage(MessageType.startDrive, point: Point(1, 2));
-    // channel.sink.add(JSON.jsonEncode(message));
     setState(() {
       _running = true;
     });
+    listenOnWebSocket();
+    // var message =
+    //     DriveSocketMessage(MessageType.startDrive, point: Point(1, 2));
+    // channel.sink.add(JSON.jsonEncode(message));
     switch (_mode) {
       case Mode.geofencing:
         startGeofencing();
