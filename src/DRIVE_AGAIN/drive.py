@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.sampling import CommandSamplingStrategy
 from DRIVE_AGAIN.common import Command
+import numpy as np
 
 
 @dataclass
@@ -18,6 +19,11 @@ class Drive:
 
         self.current_step: Step | None = None
 
+        self.commands = []
+
+    def get_commands(self) -> np.ndarray:
+        return np.array(self.commands)
+
     def run(self, timestamp_ns: float):
         if self.current_step is None:
             self.start_new_step(timestamp_ns)
@@ -29,6 +35,7 @@ class Drive:
 
     def start_new_step(self, timestamp_ns: float):
         command = self.command_sampling.sample_command()
+        self.commands.append(command)
         print(f"New command: {command}")
 
         self.current_step = Step(command, timestamp_ns)
