@@ -1,13 +1,15 @@
 import base64
-import matplotlib.pyplot as plt
-from DRIVE_AGAIN.common import Command
 import io
 import time
-from DRIVE_AGAIN.plot import draw_input_space, draw_robot_visualization_figure
+
+import matplotlib.pyplot as plt
 import numpy as np
+
+from DRIVE_AGAIN.common import Command
 from DRIVE_AGAIN.drive import Drive
 from DRIVE_AGAIN.geofencing import Geofence, GeofencingController
 from DRIVE_AGAIN.keyboard_teleop import KeyboardTeleop
+from DRIVE_AGAIN.plot import draw_input_space, draw_robot_visualization_figure
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.sampling import RandomSampling
 from DRIVE_AGAIN.server import Server
@@ -30,7 +32,7 @@ class Sim:
         self.geofencing_controller = GeofencingController(self.geofence)
 
         self.keyboard_teleop = KeyboardTeleop()
-        frequency = 20  # Hz
+        frequency = 0.5  # Hz
         self.sim_update_interval = 1 / frequency
 
     def encode_fig_to_b64(self, fig):
@@ -54,13 +56,15 @@ class Sim:
             self.drive.run(timestamp)
 
         draw_robot_visualization_figure(ax_viz, self.pose, self.geofence, self.WHEEL_BASE)
-        viz_b64 = self.encode_fig_to_b64(fig_viz)
+        # viz_b64 = self.encode_fig_to_b64(fig_viz)
 
-        draw_input_space(ax_input_space, self.drive.get_commands())
-        input_space_b64 = self.encode_fig_to_b64(fig_input_space)
+        # draw_input_space(ax_input_space, self.drive.get_commands())
+        # input_space_b64 = self.encode_fig_to_b64(fig_input_space)
 
-        self.server.update_robot_viz(viz_b64)
-        self.server.update_input_space(input_space_b64)
+        self.server.update_robot_position(self.robot.pose)
+        # self.server.update_robot_viz(viz_b64)
+        # self.server.update_input_space(input_space_b64)
+        plt.show()
 
     def run(self):
         fig_viz, ax_viz = plt.subplots()

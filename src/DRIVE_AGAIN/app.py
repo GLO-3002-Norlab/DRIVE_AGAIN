@@ -1,7 +1,9 @@
-from DRIVE_AGAIN.server import Server
 from threading import Thread
-from sim import Sim
+
 import matplotlib.pyplot as plt
+from sim import Sim
+
+from DRIVE_AGAIN.server import Server
 
 
 def start_drive_cb():
