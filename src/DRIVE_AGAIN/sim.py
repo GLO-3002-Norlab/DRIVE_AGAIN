@@ -81,14 +81,16 @@ class Sim:
         yaw += omega_z
 
         self.pose = np.array([x, y, yaw])
-    
+
     def connect_cb(self):
         self.server.send_geofence(self.geofence)
         # TODO: Send the real data bounds
-        self.server.send_data_bounds([
-            np.array([0., 0.]),
-            np.array([1., 0.]),
-            np.array([1., 1.]),
-            np.array([0., 1.]),
-            np.array([0., 0.])
-        ])
+        self.server.send_data_bounds(
+            [
+                np.array([0.0, 0.0]),
+                np.array([1.0, 0.0]),
+                np.array([1.0, 1.0]),
+                np.array([0.0, 1.0]),
+                np.array([0.0, 0.0]),
+            ]
+        )

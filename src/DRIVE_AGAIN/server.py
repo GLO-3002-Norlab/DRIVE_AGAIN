@@ -14,15 +14,15 @@ from DRIVE_AGAIN.geofencing import Geofence
 
 
 class MessageType:
-  startGeofencing="startGeofencing"
-  stopGeofencing="stopGeofencing"
-  startDrive="startDrive"
-  stopDrive="stopDrive"
-  dataBounds="dataBounds"
-  geoFence="geoFence"
-  botPose="botPose"
-  data="data"
-  files="files"
+    startGeofencing = "startGeofencing"
+    stopGeofencing = "stopGeofencing"
+    startDrive = "startDrive"
+    stopDrive = "stopDrive"
+    dataBounds = "dataBounds"
+    geoFence = "geoFence"
+    botPose = "botPose"
+    data = "data"
+    files = "files"
 
 
 class DriveSocketMessage:
@@ -36,17 +36,16 @@ class DriveSocketMessage:
         self.pose = pose
 
     def toJson(self) -> str:
-        return json.dumps({
-            "type": self.type,
-            "positions": self.positions,
-            "pose": self.pose
-        })
+        return json.dumps({"type": self.type, "positions": self.positions, "pose": self.pose})
+
 
 class Server:
     connect_cb: Callable[[], None] | None = None
 
     def __init__(self, start_geofencing_cb, stop_geofencing_cb, start_drive_cb, stop_drive_cb):
-        self.app, self.socketio = self.create_server(start_geofencing_cb, stop_geofencing_cb, start_drive_cb, stop_drive_cb)
+        self.app, self.socketio = self.create_server(
+            start_geofencing_cb, stop_geofencing_cb, start_drive_cb, stop_drive_cb
+        )
 
     def run(self):
         self.socketio.run(self.app, debug=True)
@@ -55,7 +54,7 @@ class Server:
         x, y, yaw = pose
         msg = DriveSocketMessage(MessageType.botPose, pose={"x": x, "y": y, "yaw": yaw})
         self.socketio.emit("data", msg.toJson())
-    
+
     def send_geofence(self, geofence: Geofence):
         coords: zip[tuple[float, float]] = zip(*geofence.polygon.exterior.coords.xy)
         msg = DriveSocketMessage(MessageType.geoFence, positions=[{"x": p[0], "y": p[1]} for p in coords])
@@ -95,11 +94,11 @@ class Server:
         @socketio.on(MessageType.stopGeofencing)
         def stop_geofencing():
             stop_geofencing_cb()
-            
+
         @socketio.on(MessageType.startDrive)
         def start_drive():
             start_drive_cb()
-            
+
         @socketio.on(MessageType.stopDrive)
         def stop_drive():
             stop_drive_cb()
