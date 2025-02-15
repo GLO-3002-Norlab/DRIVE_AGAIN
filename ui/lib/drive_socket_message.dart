@@ -59,7 +59,6 @@ class DriveSocketMessage {
   MessageType type;
   List<Position>? positions;
   Pose? pose;
-  // List<String> strings;
 
   DriveSocketMessage(this.type, {this.positions, this.pose});
 

@@ -29,7 +29,6 @@ class DriveSocketMessage:
     type: str
     positions: list[dict[str, float]] | None
     pose: dict[str, float] | None
-    # // List<String> strings
 
     def __init__(self, type, positions: list[dict[str, float]] | None = None, pose: dict[str, float] | None = None):
         self.type = type
@@ -69,12 +68,6 @@ class Server:
     def send_data_bounds(self, bounds: list[Pose]):
         msg = DriveSocketMessage(MessageType.dataBounds, positions=[{"x": p[0], "y": p[1]} for p in bounds])
         self.socketio.emit("data", msg.toJson())
-        
-    # def update_robot_viz(self, robot_viz_image_b64):
-    #     self.socketio.emit("robot_vizualisation_update", {"image_data": robot_viz_image_b64})
-
-    # def update_input_space(self, input_space_image_b64):
-    #     self.socketio.emit("input_space_update", {"image_data": input_space_image_b64})
 
     def create_server(self, start_geofencing_cb, stop_geofencing_cb, start_drive_cb, stop_drive_cb):
         app = Flask(__name__)

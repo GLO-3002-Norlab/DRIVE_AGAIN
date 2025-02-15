@@ -62,16 +62,8 @@ class Sim:
         else:
             self.drive.run(timestamp)
 
-        # draw_robot_visualization_figure(ax_viz, self.pose, self.geofence, self.WHEEL_BASE)
-        # viz_b64 = self.encode_fig_to_b64(fig_viz)
-
-        # draw_input_space(ax_input_space, self.drive.get_commands())
-        # input_space_b64 = self.encode_fig_to_b64(fig_input_space)
-
         self.server.update_robot_position(self.robot.pose)
         self.server.send_data_point(self.drive.next_command)
-        # self.server.update_robot_viz(viz_b64)
-        # self.server.update_input_space(input_space_b64)
 
     def run(self):
         fig_viz, ax_viz = plt.subplots()
@@ -92,6 +84,7 @@ class Sim:
     
     def connect_cb(self):
         self.server.send_geofence(self.geofence)
+        # TODO: Send the real data bounds
         self.server.send_data_bounds([
             np.array([0., 0.]),
             np.array([1., 0.]),
