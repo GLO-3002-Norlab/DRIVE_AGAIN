@@ -45,12 +45,17 @@ class Sim:
 
         self.geofencing_controller.update(self.pose)
 
-        command = None
-        if self.keyboard_teleop.is_active():
+        if self.keyboard_teleop.is_deadman_switch_pressed():
+            self.drive.start(timestamp)
+        else:
+            self.drive.pause()
+
+        if self.keyboard_teleop.is_teleop_active():
             command = self.keyboard_teleop.get_command(timestamp)
             self.robot.send_command(command)
         elif self.geofencing_controller.override:
             command = self.geofencing_controller.get_command(self.pose)
+            self.drive.pause()
             self.robot.send_command(command)
         else:
             self.drive.run(timestamp)
