@@ -5,7 +5,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 
-from DRIVE_AGAIN.common import Command
+from DRIVE_AGAIN.common import Command, Pose
 from DRIVE_AGAIN.drive import Drive
 from DRIVE_AGAIN.geofencing import Geofence, GeofencingController
 from DRIVE_AGAIN.keyboard_teleop import KeyboardTeleop
@@ -35,6 +35,8 @@ class Sim:
         frequency = 0.5  # Hz
         self.sim_update_interval = 1 / frequency
 
+        server.connect_cb = self.connect_cb
+
     def encode_fig_to_b64(self, fig):
         buffer = io.BytesIO()
         fig.savefig(buffer, format="png")
@@ -60,16 +62,16 @@ class Sim:
         else:
             self.drive.run(timestamp)
 
-        draw_robot_visualization_figure(ax_viz, self.pose, self.geofence, self.WHEEL_BASE)
+        # draw_robot_visualization_figure(ax_viz, self.pose, self.geofence, self.WHEEL_BASE)
         # viz_b64 = self.encode_fig_to_b64(fig_viz)
 
         # draw_input_space(ax_input_space, self.drive.get_commands())
         # input_space_b64 = self.encode_fig_to_b64(fig_input_space)
 
         self.server.update_robot_position(self.robot.pose)
+        self.server.send_data_point(self.drive.next_command)
         # self.server.update_robot_viz(viz_b64)
         # self.server.update_input_space(input_space_b64)
-        plt.show()
 
     def run(self):
         fig_viz, ax_viz = plt.subplots()
@@ -87,3 +89,13 @@ class Sim:
         yaw += omega_z
 
         self.pose = np.array([x, y, yaw])
+    
+    def connect_cb(self):
+        self.server.send_geofence(self.geofence)
+        self.server.send_data_bounds([
+            np.array([0., 0.]),
+            np.array([1., 0.]),
+            np.array([1., 1.]),
+            np.array([0., 1.]),
+            np.array([0., 0.])
+        ])

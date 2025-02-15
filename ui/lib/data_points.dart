@@ -1,17 +1,19 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:ui/drive_socket_message.dart';
 
 class PointsData with ChangeNotifier {
-  late final List<Point> _boundaries;
-  final List<Point> _points = [];
+  List<Position> _boundaries = [];
+  final List<Position> _points = [];
 
-  PointsData({required List<Point> boundaries}) {
-    _boundaries = boundaries;
+  void addPoint(Position p) {
+    _points.add(p);
+    notifyListeners();
   }
 
-  void addPoint(Point p) {
-    _points.add(p);
+  void setBoundaries(List<Position> boundaries) {
+    _boundaries = boundaries;
     notifyListeners();
   }
 }
@@ -69,8 +71,8 @@ class _DataPointsPainter extends CustomPainter {
 
   const _DataPointsPainter(this.data) : super(repaint: data);
 
-  List<Point> _transformPoints(
-      List<Point> points, List<Point> boundaries, Size size) {
+  List<Position> _transformPoints(
+      List<Position> points, List<Position> boundaries, Size size) {
     final x = boundaries.map((p) => p.x);
     final y = boundaries.map((p) => p.y);
     final minX = x.reduce(min);
@@ -81,25 +83,29 @@ class _DataPointsPainter extends CustomPainter {
     final scaleY = (size.height - 20) / (maxY - minY);
     return points
         .map((p) =>
-            Point((p.x - minX) * scaleX + 10, (p.y - minY) * scaleY + 10))
+            Position((p.x - minX) * scaleX + 10, (p.y - minY) * scaleY + 10))
         .toList();
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-    final transformedBoundaries =
-        _transformPoints(data._boundaries, data._boundaries, size);
-    final transformedPoints =
-        _transformPoints(data._points, data._boundaries, size);
-    var previous = transformedBoundaries.last;
-    for (var b in transformedBoundaries) {
-      canvas.drawLine(Offset(b.x.toDouble(), b.y.toDouble()),
-          Offset(previous.x.toDouble(), previous.y.toDouble()), Paint());
-      previous = b;
+    if (data._boundaries.isNotEmpty) {
+      final transformedBoundaries =
+          _transformPoints(data._boundaries, data._boundaries, size);
+      var previous = transformedBoundaries.last;
+      for (var b in transformedBoundaries) {
+        canvas.drawLine(Offset(b.x.toDouble(), b.y.toDouble()),
+            Offset(previous.x.toDouble(), previous.y.toDouble()), Paint());
+        previous = b;
+      }
     }
 
-    for (var p in transformedPoints) {
-      canvas.drawCircle(Offset(p.x.toDouble(), p.y.toDouble()), 4, Paint());
+    if (data._points.isNotEmpty) {
+      final transformedPoints =
+          _transformPoints(data._points, data._boundaries, size);
+      for (var p in transformedPoints) {
+        canvas.drawCircle(Offset(p.x.toDouble(), p.y.toDouble()), 4, Paint());
+      }
     }
   }
 

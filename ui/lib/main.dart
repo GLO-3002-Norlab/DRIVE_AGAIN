@@ -1,14 +1,7 @@
-import 'dart:async';
-import 'dart:io';
-import 'dart:js_interop';
-import 'dart:math';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:ui/bot_map.dart';
 import 'package:ui/data_points.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:convert' as json;
 
 import 'drive_socket_message.dart';
@@ -46,20 +39,9 @@ class _HomeState extends State<Home> {
   bool _running = false;
   Mode _mode = Mode.geofencing;
 
-  final DataPointsWidget dataPointsWidget = DataPointsWidget(
-      data: PointsData(boundaries: const [
-    Point(0, 0),
-    Point(100, 0),
-    Point(100, 100),
-    Point(0, 100),
-  ]));
-  final BotMap botMap = BotMap(
-      data: BotMapData(fence: [
-    Pose(0, 0),
-    Pose(100, 0),
-    Pose(100, 100),
-    Pose(0, 100),
-  ]));
+  final DataPointsWidget dataPointsWidget =
+      DataPointsWidget(data: PointsData());
+  final BotMap botMap = BotMap(data: BotMapData());
   Socket socket = io(SOCKET_URL, <String, dynamic>{
     'transports': ['websocket'],
     "autoReconnect": false,
@@ -85,17 +67,29 @@ class _HomeState extends State<Home> {
       case MessageType.startGeofencing:
         // TODO
         break;
+      case MessageType.stopGeofencing:
+        // TODO
+        break;
       case MessageType.startDrive:
         // TODO
         break;
-      case MessageType.dataBounds:
+      case MessageType.stopDrive:
         // TODO
+        break;
+      case MessageType.dataBounds:
+        if (message.positions != null) {
+          dataPointsWidget.data.setBoundaries(message.positions!);
+        }
         break;
       case MessageType.geoFence:
-        // TODO
+        if (message.positions != null) {
+          botMap.data.setFence(message.positions!);
+        }
         break;
       case MessageType.data:
-        // TODO
+        if (message.pose != null) {
+          dataPointsWidget.data.addPoint(message.pose!.asPosition());
+        }
         break;
       case MessageType.files:
         // TODO
@@ -103,45 +97,15 @@ class _HomeState extends State<Home> {
       case MessageType.invalid:
         print("Invalid message received");
         break;
+      default:
+        break;
     }
-  }
-
-  Future<void> listenOnWebSocket() async {
-    // channel ??= WebSocketChannel.connect(Uri.parse(SOCKET_URL));
-    // try {
-    //   await channel!.ready.then((_) {
-    //     print("Channel is connected");
-    //     channel!.stream.listen((value) async {
-    //       print("Received event: [$value]");
-    //       DriveSocketMessage message =
-    //           DriveSocketMessage.fromJson(json.jsonDecode(value));
-    //       handleMessage(message);
-    //     }).onDone(() {
-    //       print("Channel disconnected");
-    //     });
-    //   }).onError((error, stackTrace) {
-    //     print("Error on connection with socket at: $SOCKET_URL");
-    //     print(error);
-    //   });
-    // } on WebSocketChannelException {
-    //   print("error on connect!!");
-    // } on SocketException {
-    //   // if (kDebugMode) {
-    //   print("Failed to connect to socket");
-    //   // }
-    // }
-
-    // print("1: ${socket.connected}");
   }
 
   void startPressed() {
     setState(() {
       _running = true;
     });
-    listenOnWebSocket();
-    // var message =
-    //     DriveSocketMessage(MessageType.startDrive, point: Point(1, 2));
-    // channel.sink.add(JSON.jsonEncode(message));
     switch (_mode) {
       case Mode.geofencing:
         startGeofencing();
@@ -152,28 +116,34 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void startGeofencing() async {
-    // TODO
-  }
-
-  void startDrive() async {
-    var random = Random();
-    while (_running) {
-      botMap.data.setPosition(
-          Pose(random.nextDouble() * 100, random.nextDouble() * 100));
-      for (int i = 0; i < 10; i++) {
-        dataPointsWidget.data
-            .addPoint(Point(random.nextInt(100), random.nextInt(100)));
-      }
-      await Future.delayed(const Duration(seconds: 1));
-    }
-  }
-
   void stopPressed() {
     setState(() {
       _running = false;
     });
-    print("2: ${socket.connected}");
+    switch (_mode) {
+      case Mode.geofencing:
+        stopGeofencing();
+        break;
+      case Mode.drive:
+        stopDrive();
+        break;
+    }
+  }
+
+  void startGeofencing() async {
+    socket.emit(MessageType.startGeofencing.name);
+  }
+
+  void startDrive() async {
+    socket.emit(MessageType.startDrive.name);
+  }
+
+  void stopGeofencing() async {
+    socket.emit(MessageType.stopGeofencing.name);
+  }
+
+  void stopDrive() async {
+    socket.emit(MessageType.stopDrive.name);
   }
 
   void onModeChanged(Mode? value) {

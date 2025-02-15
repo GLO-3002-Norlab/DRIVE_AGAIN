@@ -4,15 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:ui/drive_socket_message.dart';
 
 class BotMapData with ChangeNotifier {
-  late final List<Pose> _fence;
+  List<Position> _fence = [];
   Pose? _position;
-
-  BotMapData({required List<Pose> fence}) {
-    _fence = fence;
-  }
 
   void setPosition(Pose p) {
     _position = p;
+    notifyListeners();
+  }
+
+  void setFence(List<Position> fence) {
+    _fence = fence;
     notifyListeners();
   }
 }
@@ -69,8 +70,8 @@ class BotPositionPainter extends CustomPainter {
 
   BotPositionPainter(this.data) : super(repaint: data);
 
-  List<Pose> _transformPoints(
-      List<Pose> points, List<Pose> boundaries, Size size) {
+  List<Position> _transformPoints(
+      List<Position> points, List<Position> boundaries, Size size) {
     final x = boundaries.map((p) => p.x);
     final y = boundaries.map((p) => p.y);
     final minX = x.reduce(min);
@@ -80,19 +81,21 @@ class BotPositionPainter extends CustomPainter {
     final maxY = y.reduce(max);
     final scaleY = (size.height - 20) / (maxY - minY);
     return points
-        .map((p) =>
-            Pose((p.x - minX) * scaleX + 10, (p.y - minY) * scaleY + 10))
+        .map(
+            (p) => Position((p.x - minX) * scaleX + 10, (p.y - minY) * scaleY + 10))
         .toList();
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-    final transformedFence = _transformPoints(data._fence, data._fence, size);
-    var previous = transformedFence.last;
-    for (var b in transformedFence) {
-      canvas.drawLine(Offset(b.x.toDouble(), b.y.toDouble()),
-          Offset(previous.x.toDouble(), previous.y.toDouble()), Paint());
-      previous = b;
+    if (data._fence.isNotEmpty) {
+      final transformedFence = _transformPoints(data._fence, data._fence, size);
+      var previous = transformedFence.last;
+      for (var b in transformedFence) {
+        canvas.drawLine(Offset(b.x.toDouble(), b.y.toDouble()),
+            Offset(previous.x.toDouble(), previous.y.toDouble()), Paint());
+        previous = b;
+      }
     }
 
     if (data._position != null) {
