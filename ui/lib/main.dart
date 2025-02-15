@@ -5,9 +5,9 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 import 'package:ui/bot_map.dart';
 import 'package:ui/data_points.dart';
-import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:convert' as json;
 
@@ -41,6 +41,8 @@ class Home extends StatefulWidget {
 enum Mode { geofencing, drive }
 
 class _HomeState extends State<Home> {
+  static const String SOCKET_URL = "http://127.0.0.1:5000";
+
   bool _running = false;
   Mode _mode = Mode.geofencing;
 
@@ -52,23 +54,33 @@ class _HomeState extends State<Home> {
     Point(0, 100),
   ]));
   final BotMap botMap = BotMap(
-      data: BotMapData(fence: const [
-    Point(0, 0),
-    Point(100, 0),
-    Point(100, 100),
-    Point(0, 100),
+      data: BotMapData(fence: [
+    Pose(0, 0),
+    Pose(100, 0),
+    Pose(100, 100),
+    Pose(0, 100),
   ]));
-  WebSocketChannel? channel;
+  Socket socket = io(SOCKET_URL, <String, dynamic>{
+    'transports': ['websocket'],
+    "autoReconnect": false,
+  })
+    ..onConnect((_) => print("Connection established with: $SOCKET_URL"))
+    ..onDisconnect((_) => print("Disconnected from socket"));
 
   @override
   void initState() {
     super.initState();
+    socket.on("data", (data) => handleMessage(data));
   }
 
-  void handleMessage(DriveSocketMessage message) {
+  void handleMessage(String data) {
+    print("Received data: ");
+    print(data);
+    DriveSocketMessage message =
+        DriveSocketMessage.fromJson(json.jsonDecode(data));
     switch (message.type) {
-      case MessageType.botPosition:
-        botMap.data.setPosition(message.point!);
+      case MessageType.botPose:
+        botMap.data.setPosition(message.pose!);
         break;
       case MessageType.startGeofencing:
         // TODO
@@ -82,43 +94,44 @@ class _HomeState extends State<Home> {
       case MessageType.geoFence:
         // TODO
         break;
-      case MessageType.botPosition:
-        // TODO
-        break;
       case MessageType.data:
         // TODO
         break;
       case MessageType.files:
         // TODO
         break;
+      case MessageType.invalid:
+        print("Invalid message received");
+        break;
     }
   }
 
   Future<void> listenOnWebSocket() async {
-    try {
-      channel ??= WebSocketChannel.connect(Uri.parse('ws://localhost:5000'));
-      await channel!.ready;
-      print("Channel is connected");
-
-      channel!.stream.listen((value) async {
-        print("Received event: [$value]");
-        DriveSocketMessage message =
-            DriveSocketMessage.fromJson(json.jsonDecode(value));
-        handleMessage(message);
-      }).onDone(() {
-        print("Channel disconnected");
-      });
-    } on WebSocketChannelException {
-      print("error on connect!!");
-    } on SocketException {
-      // if (kDebugMode) {
-      print("Failed to connect to socket");
-      // }
-    }
-    // if (channel != null) {
-    // try {}
+    // channel ??= WebSocketChannel.connect(Uri.parse(SOCKET_URL));
+    // try {
+    //   await channel!.ready.then((_) {
+    //     print("Channel is connected");
+    //     channel!.stream.listen((value) async {
+    //       print("Received event: [$value]");
+    //       DriveSocketMessage message =
+    //           DriveSocketMessage.fromJson(json.jsonDecode(value));
+    //       handleMessage(message);
+    //     }).onDone(() {
+    //       print("Channel disconnected");
+    //     });
+    //   }).onError((error, stackTrace) {
+    //     print("Error on connection with socket at: $SOCKET_URL");
+    //     print(error);
+    //   });
+    // } on WebSocketChannelException {
+    //   print("error on connect!!");
+    // } on SocketException {
+    //   // if (kDebugMode) {
+    //   print("Failed to connect to socket");
+    //   // }
     // }
-    // return;
+
+    // print("1: ${socket.connected}");
   }
 
   void startPressed() {
@@ -146,7 +159,8 @@ class _HomeState extends State<Home> {
   void startDrive() async {
     var random = Random();
     while (_running) {
-      botMap.data.setPosition(Point(random.nextInt(100), random.nextInt(100)));
+      botMap.data.setPosition(
+          Pose(random.nextDouble() * 100, random.nextDouble() * 100));
       for (int i = 0; i < 10; i++) {
         dataPointsWidget.data
             .addPoint(Point(random.nextInt(100), random.nextInt(100)));
@@ -159,6 +173,7 @@ class _HomeState extends State<Home> {
     setState(() {
       _running = false;
     });
+    print("2: ${socket.connected}");
   }
 
   void onModeChanged(Mode? value) {

@@ -1,16 +1,17 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:ui/drive_socket_message.dart';
 
 class BotMapData with ChangeNotifier {
-  late final List<Point> _fence;
-  Point? _position;
+  late final List<Pose> _fence;
+  Pose? _position;
 
-  BotMapData({required List<Point> fence}) {
+  BotMapData({required List<Pose> fence}) {
     _fence = fence;
   }
 
-  void setPosition(Point p) {
+  void setPosition(Pose p) {
     _position = p;
     notifyListeners();
   }
@@ -68,8 +69,8 @@ class BotPositionPainter extends CustomPainter {
 
   BotPositionPainter(this.data) : super(repaint: data);
 
-  List<Point> _transformPoints(
-      List<Point> points, List<Point> boundaries, Size size) {
+  List<Pose> _transformPoints(
+      List<Pose> points, List<Pose> boundaries, Size size) {
     final x = boundaries.map((p) => p.x);
     final y = boundaries.map((p) => p.y);
     final minX = x.reduce(min);
@@ -80,7 +81,7 @@ class BotPositionPainter extends CustomPainter {
     final scaleY = (size.height - 20) / (maxY - minY);
     return points
         .map((p) =>
-            Point((p.x - minX) * scaleX + 10, (p.y - minY) * scaleY + 10))
+            Pose((p.x - minX) * scaleX + 10, (p.y - minY) * scaleY + 10))
         .toList();
   }
 
