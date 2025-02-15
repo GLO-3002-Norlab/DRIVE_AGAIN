@@ -12,11 +12,11 @@ def start_geofence_cb():
 
 def stop_geofence_cb():
     print("stopping geofence")
-    
+
 
 def start_drive_cb():
     print("starting drive")
-    
+
 
 def stop_drive_cb():
     print("stopping drive")
