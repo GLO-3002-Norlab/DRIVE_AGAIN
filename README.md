@@ -19,8 +19,14 @@ python src/DRIVE_AGAIN/app.py
 
 ### Docker
 
-1. docker build -t drive_again .
-2. docker run -p 5000:5000 drive_again
+1. Build the dockerfile
+```sh
+docker build -t drive_again .
+```
+2. Run the app
+```sh
+docker run -p 5000:5000 drive_again
+```
 
 ## Test
 
