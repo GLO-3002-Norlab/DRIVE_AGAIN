@@ -1,5 +1,10 @@
-from pynput import keyboard
-from pynput.keyboard import Key, KeyCode
+try:
+    from pynput import keyboard
+except ImportError:
+    keyboard = None
+    Key = None
+    KeyCode = None
+
 import numpy as np
 
 from DRIVE_AGAIN.common import Command
@@ -17,6 +22,10 @@ class KeyboardTeleop:
     x_pressed = False  # Deadman switch
 
     def __init__(self):
+        if keyboard is None:
+            print("Running in headless environment, keyboard teleop is disabled")
+            return
+
         self.keyboard_listener = keyboard.Listener(on_press=self.on_key_press, on_release=self.on_key_release)
         self.keyboard_listener.start()
         self.v_x = 0.0
@@ -62,10 +71,7 @@ class KeyboardTeleop:
 
         return np.array([self.v_x, self.v_yaw])
 
-    def on_key_press(self, key: Key | KeyCode | None):
-        if key is None or isinstance(key, Key):
-            return
-
+    def on_key_press(self, key):
         if key.char == "w":
             self.w_pressed = True
         if key.char == "s":
@@ -77,10 +83,7 @@ class KeyboardTeleop:
         if key.char == "x":
             self.x_pressed = True
 
-    def on_key_release(self, key: Key | KeyCode | None):
-        if key is None or isinstance(key, Key):
-            return
-
+    def on_key_release(self, key):
         if key.char == "w":
             self.w_pressed = False
         if key.char == "s":
