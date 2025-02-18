@@ -14,4 +14,18 @@ $(document).ready(() => {
       $("#section-3").show();
     }
   });
+
+  let options = [
+    { value: "1", text: "Ooga" },
+    { value: "2", text: "Booga" },
+  ];
+
+  $.each(options, (index, option) => {
+    $("#dynamic-select").append(
+      $("<option>", {
+        value: option.value,
+        text: option.text,
+      })
+    );
+  });
 });
