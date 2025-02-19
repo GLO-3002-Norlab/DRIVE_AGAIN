@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 import numpy as np
-from DRIVE_AGAIN.common import Command
+from common import Command
 
 
 class CommandSamplingStrategy(ABC):

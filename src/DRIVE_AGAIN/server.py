@@ -6,11 +6,10 @@ from typing import Any, Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
+from common import Command, Pose
 from flask import Flask, render_template
 from flask_socketio import SocketIO
-
-from DRIVE_AGAIN.common import Command, Pose
-from DRIVE_AGAIN.geofencing import Geofence
+from geofencing import Geofence
 
 
 class MessageType:
@@ -20,6 +19,7 @@ class MessageType:
     stopDrive = "stopDrive"
     dataBounds = "dataBounds"
     geoFence = "geoFence"
+    mapBounds = "mapBounds"
     botPose = "botPose"
     data = "data"
     files = "files"
@@ -58,6 +58,10 @@ class Server:
     def send_geofence(self, geofence: Geofence):
         coords: zip[tuple[float, float]] = zip(*geofence.polygon.exterior.coords.xy)
         msg = DriveSocketMessage(MessageType.geoFence, positions=[{"x": p[0], "y": p[1]} for p in coords])
+        self.socketio.emit("data", msg.toJson())
+
+    def send_map_bounds(self, minX: float, minY: float, maxX: float, maxY: float):
+        msg = DriveSocketMessage(MessageType.mapBounds, positions=[{"x": minX, "y": minY}, {"x": maxX, "y": maxY}])
         self.socketio.emit("data", msg.toJson())
 
     def send_data_point(self, command: Command):

@@ -1,8 +1,9 @@
 from dataclasses import dataclass
-from DRIVE_AGAIN.robot import Robot
-from DRIVE_AGAIN.sampling import CommandSamplingStrategy
-from DRIVE_AGAIN.common import Command
+
 import numpy as np
+from common import Command
+from robot import Robot
+from sampling import CommandSamplingStrategy
 
 
 @dataclass
@@ -35,15 +36,18 @@ class Drive:
         self.next_command = self.current_step.command
         self.current_step = None
 
-    def run(self, timestamp_ns: float):
+    def run(self, timestamp_ns: float) -> bool:
+        new_command: bool = False
         if self.current_step is None:
-            return
+            return new_command
 
         if timestamp_ns - self.current_step.start_timestamp_ns > self.step_duration_s * 1e9:  # type: ignore
             self.save_step()
             self._new_step(self.next_command, timestamp_ns)
+            new_command = True
 
         self.robot.send_command(self.current_step.command)  # type: ignore
+        return new_command
 
     def get_commands(self) -> np.ndarray:
         return np.array(self.commands)

@@ -1,8 +1,7 @@
+import numpy as np
+from common import Command
 from pynput import keyboard
 from pynput.keyboard import Key, KeyCode
-import numpy as np
-
-from DRIVE_AGAIN.common import Command
 
 V_X_MAX = 5.0
 V_YAW_MAX = np.pi

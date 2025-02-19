@@ -5,6 +5,7 @@ enum MessageType {
   stopDrive,
   dataBounds,
   geoFence,
+  mapBounds,
   botPose,
   data,
   files,
@@ -67,7 +68,7 @@ class DriveSocketMessage {
             orElse: () => MessageType.invalid),
         positions =
             json.containsKey(POSITIONS_KEY) && (json[POSITIONS_KEY] != null)
-                ? [for (var p in json[POSITIONS_KEY]) Pose.fromJson(p)]
+                ? [for (var p in json[POSITIONS_KEY]) Position.fromJson(p)]
                 : null,
         pose = json.containsKey(POSE_KEY) && json[POSE_KEY] != null
             ? Pose.fromJson(json[POSE_KEY])

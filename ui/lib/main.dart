@@ -86,6 +86,11 @@ class _HomeState extends State<Home> {
           botMap.data.setFence(message.positions!);
         }
         break;
+      case MessageType.mapBounds:
+        if (message.positions != null) {
+          botMap.data.setBounds(message.positions!);
+        }
+        break;
       case MessageType.data:
         if (message.pose != null) {
           dataPointsWidget.data.addPoint(message.pose!.asPosition());

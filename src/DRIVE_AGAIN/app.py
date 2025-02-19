@@ -1,9 +1,8 @@
 from threading import Thread
 
 import matplotlib.pyplot as plt
+from server import Server
 from sim import Sim
-
-from DRIVE_AGAIN.server import Server
 
 
 def start_geofence_cb():

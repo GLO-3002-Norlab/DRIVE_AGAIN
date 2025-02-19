@@ -1,5 +1,6 @@
 from typing import Callable
-from DRIVE_AGAIN.common import Pose, Command
+
+from common import Command, Pose
 
 
 class Robot:
