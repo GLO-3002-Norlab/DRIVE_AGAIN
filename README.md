@@ -14,6 +14,11 @@ sudo apt-get install -y curl git unzip xz-utils zip libglu1-mesa build-essential
 export PATH="${PATH_TO_FLUTTER}/flutter/bin:${PATH}"
 ```
 
+## Windows (VSCode)
+1. Install [Flutter Extension](https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter).
+2. Follow on-screen prompts to install [Dart Entension](https://marketplace.visualstudio.com/items?itemName=Dart-Code.dart-code).
+3. In the bottom-right, click on `Device` then select `Enable Chrome for this project`.
+4. Execute `main.dart`.
 
 # Setup project
 
@@ -36,7 +41,3 @@ python -m pytest
 python src/DRIVE_AGAIN/sim.py # Keyboard teleop mode
 python src/DRIVE_AGAIN/sim.py drive # Drive protocol
 ```
-
-## UI setup
-
-TODO
