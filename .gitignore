@@ -1,6 +1,6 @@
 .idea
 *-venv/
-__pycache__/
+**/__pycache__/
 .python-version
 .history
 src/*.egg-info

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>DRIVE AGAIN</title>
+
+    <!-- External dependencies -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  </head>
+
+  <body>
+    <main>
+      <select id="select-option">
+        <option value="" selected disabled hidden>Choose here</option>
+        <option value="1">Option 1</option>
+        <option value="2">Option 2</option>
+        <option value="3">Option 3</option>
+      </select>
+
+      <section id="section-1" style="display: none">
+        <h1>Option 1</h1>
+        <p>Option 1 content</p>
+      </section>
+
+      <section id="section-2" style="display: none">
+        <h1>Option 2</h1>
+        <p>Option 2 content</p>
+      </section>
+
+      <section id="section-3" style="display: none">
+        <h1>Option 3</h1>
+        <p>Option 3 content</p>
+      </section>
+
+      <select id="dynamic-select"></select>
+    </main>
+
+    <script defer="defer" src="/static/js/metadata.js"></script>
+  </body>
+</html>
