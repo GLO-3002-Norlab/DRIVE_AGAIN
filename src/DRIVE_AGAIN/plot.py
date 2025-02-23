@@ -8,12 +8,12 @@ from DRIVE_AGAIN.geofencing import Geofence
 from DRIVE_AGAIN.common import Pose
 
 
-def draw_robot_visualization_figure(ax: Axes, pose: Pose, geofence: Geofence, wheel_base: float) -> None:
+def draw_robot_visualization_figure(ax: Axes, pose: Pose, geofence_points: np.ndarray, wheel_base: float) -> None:
     ax.clear()
     ax.set_xlim(-5, 5)
     ax.set_ylim(-5, 5)
-    draw_geofence(ax, geofence)
-    draw_robot(ax, pose, geofence, wheel_base)
+    draw_incomplete_geofence(ax, geofence_points)
+    draw_robot(ax, pose, wheel_base)
 
 
 def draw_input_space(ax: Axes, commands: np.ndarray) -> None:
@@ -29,11 +29,10 @@ def draw_input_space(ax: Axes, commands: np.ndarray) -> None:
         ax.scatter(commands[:, 1], commands[:, 0])
 
 
-def draw_robot(ax: Axes, pose: Pose, geofence: Geofence, wheel_base: float) -> None:
+def draw_robot(ax: Axes, pose: Pose, wheel_base: float) -> None:
     x, y, yaw = pose
 
-    robot_color = "green" if geofence.is_point_inside((x, y)) else "red"
-    circle = matplotlib.patches.Circle((x, y), wheel_base / 2, color=robot_color)
+    circle = matplotlib.patches.Circle((x, y), wheel_base / 2, color="green")
 
     wheel_width = 0.1
     wheel_height = wheel_base * 0.8
@@ -65,6 +64,11 @@ def draw_robot(ax: Axes, pose: Pose, geofence: Geofence, wheel_base: float) -> N
     ax.add_patch(circle)
     ax.add_patch(left_wheel)
     ax.add_patch(right_wheel)
+
+
+def draw_incomplete_geofence(ax: Axes, geofence_points: np.ndarray) -> None:
+    if len(geofence_points) > 0:
+        ax.plot(geofence_points[:, 0], geofence_points[:, 1], marker="o", linestyle="-", color="r")
 
 
 def draw_geofence(ax: Axes, geofence: Geofence) -> None:

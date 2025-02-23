@@ -13,35 +13,56 @@ V_X_MAX = 5.0
 V_YAW_MAX = np.pi
 
 
-class KeyboardTeleop:
-    w_pressed = False  # Forward
-    a_pressed = False  # Left
-    s_pressed = False  # Backward
-    d_pressed = False  # Right
-
-    x_pressed = False  # Deadman switch
-
+class KeyboardListener:
     def __init__(self):
         if keyboard is None:
-            print("Running in headless environment, keyboard teleop is disabled")
+            print("Running in headless environment, keyboard listener is disabled")
             return
 
-        self.keyboard_listener = keyboard.Listener(on_press=self.on_key_press, on_release=self.on_key_release)
-        self.keyboard_listener.start()
+        self.pressed_keys = set()
+        self.listener = keyboard.Listener(on_press=self.on_press, on_release=self.on_release)
+        self.listener.start()
+
+    def on_press(self, key):
+        try:
+            self.pressed_keys.add(key.char)
+        except AttributeError:
+            self.pressed_keys.add(key)
+
+    def on_release(self, key):
+        try:
+            self.pressed_keys.discard(key.char)
+        except AttributeError:
+            self.pressed_keys.discard(key)
+
+    def get_pressed_keys(self):
+        return list(self.pressed_keys)
+
+
+class KeyboardTeleop:
+    FORWARD_KEY = "w"
+    BACKWARD_KEY = "s"
+    LEFT_KEY = "a"
+    RIGHT_KEY = "d"
+    GEOFENCE_KEY = "g"
+    DEADMAN_KEY = "x"
+
+    def __init__(self):
+        self.keyboard_listener = KeyboardListener()
         self.v_x = 0.0
         self.v_yaw = 0.0
         self.last_timestamp_ns: None | float = None
 
-    def is_deadman_switch_pressed(self):
-        return self.x_pressed
+    def is_deadman_key_pressed(self):
+        return self.DEADMAN_KEY in self.keyboard_listener.get_pressed_keys()
 
-    def is_teleop_active(self):
-        return self.w_pressed or self.a_pressed or self.s_pressed or self.d_pressed
+    def is_geofence_key_pressed(self):
+        return self.GEOFENCE_KEY in self.keyboard_listener.get_pressed_keys()
 
-    def __del__(self):
-        self.keyboard_listener.join()
+    def is_key_pressed(self, key) -> bool:
+        return key in self.keyboard_listener.get_pressed_keys()
 
-    def get_command(self, timestamp_ns: float) -> Command:
+    def get_robot_command(self, timestamp_ns: float) -> Command:
         if self.last_timestamp_ns is None:
             self.last_timestamp_ns = timestamp_ns
             return np.array([0.0, 0.0])
@@ -49,15 +70,20 @@ class KeyboardTeleop:
         dt_s = (timestamp_ns - self.last_timestamp_ns) * 1e-9
         self.last_timestamp_ns = timestamp_ns
 
+        forward_press = self.is_key_pressed(self.FORWARD_KEY)
+        backward_press = self.is_key_pressed(self.BACKWARD_KEY)
+        left_press = self.is_key_pressed(self.LEFT_KEY)
+        right_press = self.is_key_pressed(self.RIGHT_KEY)
+
         a_x = 0.0
         a_yaw = 0.0
-        if self.w_pressed and not self.s_pressed:
+        if forward_press and not backward_press:
             a_x = 2.0
-        if self.s_pressed and not self.w_pressed:
+        if backward_press and not forward_press:
             a_x = -2.0
-        if self.a_pressed and not self.d_pressed:
+        if left_press and not right_press:
             a_yaw = np.pi / 2.0
-        if self.d_pressed and not self.a_pressed:
+        if right_press and not left_press:
             a_yaw = -np.pi / 2.0
 
         self.v_x = self.v_x + a_x * dt_s
@@ -70,27 +96,3 @@ class KeyboardTeleop:
         self.v_yaw = np.clip(self.v_yaw, -V_YAW_MAX, V_YAW_MAX)
 
         return np.array([self.v_x, self.v_yaw])
-
-    def on_key_press(self, key):
-        if key.char == "w":
-            self.w_pressed = True
-        if key.char == "s":
-            self.s_pressed = True
-        if key.char == "a":
-            self.a_pressed = True
-        if key.char == "d":
-            self.d_pressed = True
-        if key.char == "x":
-            self.x_pressed = True
-
-    def on_key_release(self, key):
-        if key.char == "w":
-            self.w_pressed = False
-        if key.char == "s":
-            self.s_pressed = False
-        if key.char == "a":
-            self.a_pressed = False
-        if key.char == "d":
-            self.d_pressed = False
-        if key.char == "x":
-            self.x_pressed = False

@@ -16,7 +16,7 @@ class Geofence:
         if not self.is_point_inside(self.origin):
             raise ValueError("Origin point is outside the geofence.")
 
-    def is_point_inside(self, point: tuple[float, float]) -> bool:
+    def is_point_inside(self, point: tuple[float, float] | np.ndarray) -> bool:
         """
         Check if a point is inside the geofence.
         :param point: A tuple (x, y) representing the point.
