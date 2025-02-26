@@ -1,9 +1,5 @@
-import base64
-import matplotlib.pyplot as plt
 from DRIVE_AGAIN.common import Command, Pose
-import io
 import time
-from DRIVE_AGAIN.plot import draw_input_space, draw_robot_visualization_figure
 import numpy as np
 from DRIVE_AGAIN.drive import Drive
 from DRIVE_AGAIN.geofencing import Geofence, GeofencingController
@@ -33,13 +29,7 @@ class Sim:
         frequency = 20  # Hz
         self.sim_update_interval = 1 / frequency
 
-    def encode_fig_to_b64(self, fig):
-        # TODO: This should not be in here
-        buffer = io.BytesIO()
-        fig.savefig(buffer, format="png")
-        return base64.b64encode(buffer.getvalue()).decode("utf-8")
-
-    def update(self, fig_viz, ax_viz, fig_input_space, ax_input_space):
+    def update(self):
         timestamp = time.time_ns()
 
         # TODO: Think of a better way to handle input to make sure to not switch multiple times
@@ -65,20 +55,13 @@ class Sim:
             geofence_points = self.drive.get_geofence_points()
         else:
             geofence_points = np.array([np.array(point) for point in self.drive.geofence.polygon.exterior.coords])
-        draw_robot_visualization_figure(ax_viz, self.pose, geofence_points, self.WHEEL_BASE)
-        viz_b64 = self.encode_fig_to_b64(fig_viz)
 
-        draw_input_space(ax_input_space, self.drive.get_commands())
-        input_space_b64 = self.encode_fig_to_b64(fig_input_space)
-
-        self.server.update_robot_viz(viz_b64)
-        self.server.update_input_space(input_space_b64)
+        self.server.update_robot_viz(self.robot.pose, geofence_points, self.WHEEL_BASE)
+        self.server.update_input_space(self.drive.get_commands())
 
     def run(self):
-        fig_viz, ax_viz = plt.subplots()
-        fig_input_space, ax_input_space = plt.subplots()
         while True:
-            self.update(fig_viz, ax_viz, fig_input_space, ax_input_space)
+            self.update()
             time.sleep(self.sim_update_interval)
 
     def apply_goal(self, goal: Pose) -> None:
