@@ -35,5 +35,5 @@ theme:
 nav:
   - Home: "index.md"
   - Installation: "Installation.md"
-  - Usage:
-      - "Recording Data": "RecordingData.md"
+  - Developers:
+      - "Command Sampling": "CommandSampling.md"
