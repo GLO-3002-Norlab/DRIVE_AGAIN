@@ -44,7 +44,6 @@ class KeyboardTeleop:
     BACKWARD_KEY = "s"
     LEFT_KEY = "a"
     RIGHT_KEY = "d"
-    GEOFENCE_KEY = "g"
     DEADMAN_KEY = "x"
 
     def __init__(self):
@@ -55,9 +54,6 @@ class KeyboardTeleop:
 
     def is_deadman_key_pressed(self):
         return self.DEADMAN_KEY in self.keyboard_listener.get_pressed_keys()
-
-    def is_geofence_key_pressed(self):
-        return self.GEOFENCE_KEY in self.keyboard_listener.get_pressed_keys()
 
     def is_key_pressed(self, key) -> bool:
         return key in self.keyboard_listener.get_pressed_keys()

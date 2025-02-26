@@ -23,7 +23,7 @@ class App:
         command_sampling_strategy = RandomSampling()
         self.drive = Drive(self.robot, command_sampling_strategy, step_duration_s=3.0)
 
-        self.server = Server(self.start_drive_cb, self.start_geofence_cb, self.stop_geofence_cb)
+        self.server = Server(self.start_drive_cb, self.start_geofence_cb)
         self.keyboard_teleop = KeyboardTeleop()
 
         frequency = 20  # Hz
@@ -35,11 +35,7 @@ class App:
 
     def update_loop(self):
         timestamp = time.time_ns()
-
         self.sim.update()
-
-        if self.keyboard_teleop.is_geofence_key_pressed():
-            self.drive.change_state("command_sampling")
 
         if self.keyboard_teleop.is_deadman_key_pressed():
             self.drive.start(timestamp)
@@ -61,13 +57,10 @@ class App:
         time.sleep(self.update_interval)
 
     def start_drive_cb(self):
-        print("starting drive")
+        self.drive.change_state("command_sampling")
 
     def start_geofence_cb(self):
-        print("starting geofence")
-
-    def stop_geofence_cb(self):
-        print("stopping geofence")
+        self.drive.change_state("geofence_creation")
 
 
 def main():

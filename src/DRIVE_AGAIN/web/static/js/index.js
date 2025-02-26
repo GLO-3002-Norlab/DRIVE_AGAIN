@@ -8,14 +8,10 @@ function handleButtonClick() {
     socket.emit("start_geofencing");
     button.textContent = "Stop Geofencing";
   } else if (stage === 1) {
-    socket.emit("stop_geofencing");
-    button.textContent = "Start DRIVE";
-  } else if (stage === 2) {
     socket.emit("start_drive");
     button.textContent = "Drive Started";
     button.disabled = true;
-  }
-
+  } 
   stage++;
 }
 
