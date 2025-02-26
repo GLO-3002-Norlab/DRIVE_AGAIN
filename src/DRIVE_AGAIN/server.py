@@ -1,10 +1,12 @@
 import io
 import base64
+from matplotlib.figure import Figure
 import numpy as np
 import matplotlib.pyplot as plt
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 from DRIVE_AGAIN.common import Pose
+from DRIVE_AGAIN.drive import Drive
 from plot import draw_input_space, draw_robot_visualization_figure
 
 
@@ -18,18 +20,18 @@ class Server:
     def run(self):
         self.socketio.run(self.app, host="0.0.0.0", debug=True, allow_unsafe_werkzeug=True)
 
-    def encode_fig_to_b64(self, fig):
+    def encode_fig_to_b64(self, fig: Figure):
         buffer = io.BytesIO()
         fig.savefig(buffer, format="png")
         return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
-    def update_robot_viz(self, robot_pose: Pose, geofence_points, wheel_base):
+    def update_robot_viz(self, robot_pose: Pose, geofence_points: np.ndarray, wheel_base: float):
         draw_robot_visualization_figure(self.ax_viz, robot_pose, geofence_points, wheel_base)
         viz_b64 = self.encode_fig_to_b64(self.fig_viz)
 
         self.socketio.emit("robot_vizualisation_update", {"image_data": viz_b64})
 
-    def update_input_space(self, commands):
+    def update_input_space(self, commands: np.ndarray):
         draw_input_space(self.ax_input_space, commands)
         input_space_b64 = self.encode_fig_to_b64(self.fig_input_space)
 
