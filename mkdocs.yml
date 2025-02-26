@@ -2,9 +2,9 @@
 
 site_name: DRIVE_AGAIN
 repo_url: https://github.com/GLO-3002-Norlab/DRIVE_AGAIN
-edit_uri: edit/master/doc
+edit_uri: edit/master/docs
 site_description: "DRIVE is an open-source uncrewed ground vehicle (UGV) training dataset gathering protocol."
-docs_dir: "doc"
+docs_dir: "docs"
 theme:
   name: material
   palette:
