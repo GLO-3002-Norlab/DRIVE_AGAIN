@@ -1,5 +1,3 @@
-# DRIVE_AGAIN
-
 # DRIVE - Data-driven Robot Input Vector Exploration
 
 [![DOI](https://zenodo.org/badge/DOI/10.48550/arxiv.2309.110718.svg)](https://doi.org/10.48550/arXiv.2309.10718)
@@ -14,7 +12,7 @@ This protocol automates the task of driving the UGV to gather a training dataset
 
 ## Documentation and Tutorials
 
-Quick link for the documentation: [](https://drive-again.readthedocs.io/en/latest/).
+Quick link for the [documentation](https://drive-again.readthedocs.io/en/latest/).
 
 Those tutorials are written using Markdown syntax and stored in the project's `/docs` folder. Their scope ranges from how to use the project to technical documentation for more experienced developer on how to extend the codebase.
 
