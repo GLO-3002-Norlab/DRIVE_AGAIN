@@ -42,3 +42,23 @@ The code implementation includes the following:
 To see how to install DRIVE on your robot, see [Installation](Installation.md)
 
 ![Context diagram for the application](images/context_diagram.png)
+
+## Citing
+
+If you use DRIVE in an academic context, please cite [our preprint](https://www.researchgate.net/publication/374023495_DRIVE_Data-driven_Robot_Input_Vector_Exploration):
+
+```bibtex
+@misc{baril2023drive,
+      title={DRIVE: Data-driven Robot Input Vector Exploration},
+      author={Dominic Baril and Simon-Pierre Deschênes and Luc Coupal and Cyril Goffin and Julien Lépine and Philippe Giguère and François Pomerleau},
+      year={2023},
+      eprint={2309.10718},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO}
+}
+```
+
+## Datasets
+
+The datasets used in our paper are publicly available.
+[Follow this link to download them in Pandas Dataframe format](https://github.com/norlab-ulaval/Norlab_wiki/wiki/DRIVE-datasets).
