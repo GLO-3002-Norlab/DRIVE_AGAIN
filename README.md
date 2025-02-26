@@ -1,5 +1,3 @@
-# DRIVE_AGAIN
-
 # DRIVE - Data-driven Robot Input Vector Exploration
 
 [![DOI](https://zenodo.org/badge/DOI/10.48550/arxiv.2309.110718.svg)](https://doi.org/10.48550/arXiv.2309.10718)
