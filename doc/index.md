@@ -1,5 +1,5 @@
 # DRIVE
 
-![Warthog doing donuts](images/logo.jpg)
+![Warthog doing donuts](images/drive.jpg)
 
 [Proceed to Installation](Installation.md)
