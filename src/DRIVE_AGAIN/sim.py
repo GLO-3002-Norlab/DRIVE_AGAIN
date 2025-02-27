@@ -1,13 +1,15 @@
 import base64
-import matplotlib.pyplot as plt
-from DRIVE_AGAIN.common import Command, Pose
 import io
 import time
-from DRIVE_AGAIN.plot import draw_input_space, draw_robot_visualization_figure
+
+import matplotlib.pyplot as plt
 import numpy as np
+
+from DRIVE_AGAIN.common import Command, Pose
 from DRIVE_AGAIN.drive import Drive
 from DRIVE_AGAIN.geofencing import Geofence, GeofencingController
 from DRIVE_AGAIN.keyboard_teleop import KeyboardTeleop
+from DRIVE_AGAIN.plot import draw_input_space, draw_robot_visualization_figure
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.sampling import RandomSampling
 from DRIVE_AGAIN.server import Server

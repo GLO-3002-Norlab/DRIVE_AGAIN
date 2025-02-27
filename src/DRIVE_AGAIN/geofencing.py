@@ -1,6 +1,7 @@
-from DRIVE_AGAIN.common import Command, Pose
 import numpy as np
 from shapely.geometry import Point, Polygon
+
+from DRIVE_AGAIN.common import Command, Pose
 
 
 class Geofence:
