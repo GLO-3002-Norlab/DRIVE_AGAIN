@@ -31,6 +31,20 @@ class DriveState(ABC):
         pass
 
 
+class IdleState(DriveState):
+    def __init__(self, robot: Robot):
+        pass
+
+    def start(self, timestamp_ns: float):
+        pass
+
+    def pause(self):
+        pass
+
+    def run(self, _: float):
+        pass
+
+
 class GeofenceCreationState(DriveState):
     def __init__(self, robot: Robot, distance_thresold_meters: float = 0.5):
         self.robot = robot
@@ -126,7 +140,7 @@ class Drive:
         self.robot = robot
         self.command_sampling = command_sampling
         self.step_duration_s = step_duration_s
-        self.drive_state = GeofenceCreationState(self.robot)
+        self.drive_state = IdleState(self.robot)
         self.geofence: None | Geofence = None
 
     def change_state(self, new_state: DriveStateEnum):
