@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 import numpy as np
+
 from DRIVE_AGAIN.common import Command
 
 

@@ -4,3 +4,5 @@
 .python-version
 .history
 src/*.egg-info
+build/*
+.coverage

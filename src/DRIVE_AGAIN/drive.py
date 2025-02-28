@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from enum import Enum
 from typing import Literal
+
+import numpy as np
+
+from DRIVE_AGAIN.common import Command
 from DRIVE_AGAIN.geofencing import Geofence
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.sampling import CommandSamplingStrategy
-from DRIVE_AGAIN.common import Command
-import numpy as np
 
 
 @dataclass
@@ -29,10 +32,11 @@ class DriveState(ABC):
 
 
 class GeofenceCreationState(DriveState):
-    def __init__(self, robot: Robot):
+    def __init__(self, robot: Robot, distance_thresold_meters: float = 0.5):
         self.robot = robot
         self.geofence_points: list[np.ndarray] = [self.robot.pose[:2]]
         self.geofence_started = False
+        self.distance_thresold_meters = distance_thresold_meters
 
     def start(self, timestamp_ns: float):
         self.geofence_started = True
@@ -47,8 +51,7 @@ class GeofenceCreationState(DriveState):
 
         last_point = self.geofence_points[-1]
 
-        distance_thresold_meters = 0.5
-        if np.linalg.norm(self.robot.pose[:2] - last_point[:2]) > distance_thresold_meters:
+        if np.linalg.norm(self.robot.pose[:2] - last_point[:2]) > self.distance_thresold_meters:
             self.geofence_points.append(self.robot.pose[:2])
 
 
@@ -96,15 +99,13 @@ class CommandSamplingState(DriveState):
             return
 
         if timestamp_ns - self.current_step.start_timestamp_ns > self.step_duration_s * 1e9:  # type: ignore
-            self.save_step()
+            self._save_step()
             self._new_step(self.next_command, timestamp_ns)
 
         self.robot.send_command(self.current_step.command)  # type: ignore
 
-    def save_step(self):
-        if self.current_step is None:
-            print("No step to save!")
-            return
+    def _save_step(self):
+        assert self.current_step is not None
 
         print("Step completed! Saving step data...")
         self.commands.append(self.current_step.command)
@@ -115,6 +116,11 @@ class CommandSamplingState(DriveState):
         self.next_command = self.command_sampling_strategy.sample_command()
 
 
+class DriveStateEnum(Enum):
+    geofence_creation = 0
+    command_sampling = 1
+
+
 class Drive:
     def __init__(self, robot: Robot, command_sampling: CommandSamplingStrategy, step_duration_s: float):
         self.robot = robot
@@ -123,16 +129,18 @@ class Drive:
         self.drive_state = GeofenceCreationState(self.robot)
         self.geofence: None | Geofence = None
 
-    def change_state(self, new_state_str: Literal["geofence_creation", "command_sampling"]):
-        if new_state_str == "geofence_creation":
-            print("Switching to geofence creation state...")
-            self.drive_state = GeofenceCreationState(self.robot)
-        elif new_state_str == "command_sampling" and isinstance(self.drive_state, GeofenceCreationState):
-            print("Switching to command sampling state...")
-            self.geofence = Geofence(self.drive_state.geofence_points)  # type: ignore
-            self.drive_state = CommandSamplingState(
-                self.robot, self.command_sampling, self.step_duration_s, self.geofence
-            )
+    def change_state(self, new_state: DriveStateEnum):
+        match new_state:
+            case DriveStateEnum.geofence_creation:
+                print("Switching to geofence creation state...")
+                self.drive_state = GeofenceCreationState(self.robot)
+            case DriveStateEnum.command_sampling:
+                if isinstance(self.drive_state, GeofenceCreationState):
+                    print("Switching to command sampling state...")
+                    self.geofence = Geofence(self.drive_state.geofence_points)  # type: ignore
+                    self.drive_state = CommandSamplingState(
+                        self.robot, self.command_sampling, self.step_duration_s, self.geofence
+                    )
 
     def start(self, timestamp_ns: float):
         self.drive_state.start(timestamp_ns)
@@ -157,8 +165,3 @@ class Drive:
 
     def get_geofence(self) -> None | Geofence:
         return self.geofence
-
-    def _new_step(self, command: Command, timestamp_ns: float):
-        print(f"Starting step with command: {command}")
-        self.current_step = Step(command, timestamp_ns)
-        self.next_command = self.command_sampling.sample_command()
