@@ -6,8 +6,7 @@ import matplotlib.pyplot as plt
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 from DRIVE_AGAIN.common import Pose
-from DRIVE_AGAIN.drive import Drive
-from plot import draw_input_space, draw_robot_visualization_figure
+from DRIVE_AGAIN.plot import draw_input_space, draw_robot_visualization_figure
 
 
 class Server:
