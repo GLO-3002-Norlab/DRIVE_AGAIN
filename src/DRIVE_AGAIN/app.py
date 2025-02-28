@@ -1,13 +1,14 @@
-from DRIVE_AGAIN.drive import Drive
+from DRIVE_AGAIN.drive import Drive, DriveStateEnum
 from DRIVE_AGAIN.keyboard_teleop import KeyboardTeleop
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.sampling import RandomSampling
 from DRIVE_AGAIN.server import Server
+from DRIVE_AGAIN.sim import Sim
 import numpy as np
 import time
 from threading import Thread
-from DRIVE_AGAIN.sim import Sim
 import matplotlib.pyplot as plt
+
 
 WHEEL_BASE = 0.5
 
@@ -57,10 +58,10 @@ class App:
         time.sleep(self.update_interval)
 
     def start_drive_cb(self):
-        self.drive.change_state("command_sampling")
+        self.drive.change_state(DriveStateEnum.command_sampling)
 
     def start_geofence_cb(self):
-        self.drive.change_state("geofence_creation")
+        self.drive.change_state(DriveStateEnum.geofence_creation)
 
 
 def main():
