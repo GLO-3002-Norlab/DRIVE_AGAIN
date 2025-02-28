@@ -13,7 +13,7 @@ class Sim:
 
     def update(self):
         # Simulating localization noise
-        noisy_pose = self.pose + np.random.normal(0, 0.1, 3)
+        noisy_pose = self.pose + np.random.normal(0, 0.05, 3)
         self.robot_pose_update_fn(noisy_pose)
 
     def apply_goal(self, goal: Pose) -> bool:
