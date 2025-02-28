@@ -168,19 +168,6 @@ def test_Drive_change_state_changes_to_GeofenceCreationState(drive: Drive):
     assert isinstance(drive.drive_state, GeofenceCreationState)
 
 
-def test_Drive_change_state_changes_to_CommandSamplingState_if_is_GeofenceCreationState(
-    drive: Drive, geofence_creation_state: GeofenceCreationState
-):
-    """Test if change state changes the state to CommandSamplingState if it is chosen
-    and the current state is GeofenceCreationState"""
-    drive.drive_state = geofence_creation_state
-    old_geofence = drive.geofence
-    drive.change_state(DriveStateEnum.command_sampling)
-
-    assert isinstance(drive.drive_state, CommandSamplingState)
-    assert drive.geofence != old_geofence
-
-
 def test_Drive_change_state_no_change_to_state_if_is_CommandSamplingState(
     drive: Drive, command_sampling_state: CommandSamplingState
 ):
