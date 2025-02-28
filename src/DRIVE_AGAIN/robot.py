@@ -14,6 +14,9 @@ class Robot:
     def pose_callback(self, pose: Pose) -> None:
         self.pose = pose
 
+    def goal_reached_callback(self) -> None:
+        self.goal_reached = True
+
     def send_command(self, command: Command) -> None:
         self.send_command_fn(command)
 
