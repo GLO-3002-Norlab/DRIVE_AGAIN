@@ -1,5 +1,6 @@
 services:
   drive_ros:
+    container_name: drive_ros
     build:
       context: .
       dockerfile: ros.Dockerfile
@@ -11,6 +12,7 @@ services:
       - 5000
 
   diff_drive_sim:
+    container_name: diff_drive_sim
     build:
       context: .
       dockerfile: ros.Dockerfile
