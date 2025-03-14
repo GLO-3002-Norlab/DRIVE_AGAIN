@@ -4,6 +4,15 @@ body {
   max-width: 100%;
 }
 
+.top-bar,
+.bottom-bar {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+
 .image-container {
   margin-top: 2rem;
   display: flex;
