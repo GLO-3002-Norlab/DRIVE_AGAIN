@@ -7,12 +7,14 @@ services:
     ipc: host
     privileged: true
     command: ros2 run drive_ros drive_ros_bridge
+    expose:
+      - 5000
 
-  test:
-    build:
-      context: .
-      dockerfile: ros.Dockerfile
-    network_mode: host
-    ipc: host
-    privileged: true
-    command: ros2 topic echo /cmd_drive
+  # test:
+  #   build:
+  #     context: .
+  #     dockerfile: ros.Dockerfile
+  #   network_mode: host
+  #   ipc: host
+  #   privileged: true
+  #   command: ros2 topic echo /cmd_drive

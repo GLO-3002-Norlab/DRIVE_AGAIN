@@ -5,12 +5,12 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "shapely",
-    "numpy>=1.19.5",
+    "numpy>=2.2.3",
     "black",
     "pytest",
     "numpy",
     "pynput",
-    "matplotlib",
+    "matplotlib>=3.10.1",
     "flask-socketio"
 ]
 
