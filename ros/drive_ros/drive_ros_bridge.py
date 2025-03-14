@@ -2,7 +2,8 @@ from threading import Thread
 
 import numpy as np
 import rclpy
-from geometry_msgs.msg import Twist
+import tf_transformations
+from geometry_msgs.msg import Pose, Twist
 from rclpy.node import Node
 
 from DRIVE_AGAIN.drive import Drive, DriveStateEnum
@@ -30,7 +31,8 @@ class DriveRosBridge(Node):
         self.interface_thread.start()
 
         # ROS setup
-        self.cmd_pub = self.create_publisher(Twist, "cmd_drive", 10)
+        self.cmd_pub = self.create_publisher(Twist, "cmd_vel", 10)
+        self.loc_sub = self.create_subscription(Pose, "pose", self.loc_callback, 10)
         self.timer = self.create_timer(0.1, self.control_loop)
 
         self.get_logger().info("Drive ROS bridge started")
@@ -49,15 +51,11 @@ class DriveRosBridge(Node):
         self.cmd_pub.publish(msg)
 
     def control_loop(self):
-        msg = Twist()
-        msg.linear.x = 69.0
-        msg.angular.z = 420.0
-        self.cmd_pub.publish(msg)
-
         current_time_ns = self.get_clock().now().nanoseconds
         self.drive.start(current_time_ns)
         self.drive.run(current_time_ns)
 
+        # TODO: Do something cleaner with this geofence_points hack
         if self.drive.geofence is None:
             geofence_points = self.drive.get_geofence_points()
         else:
@@ -66,7 +64,11 @@ class DriveRosBridge(Node):
         self.server.update_robot_viz(self.robot.pose, geofence_points, WHEEL_BASE)
         self.server.update_input_space(self.drive.get_commands())
 
-    def loc_callback(self, pose):
+    def loc_callback(self, pose_msg: Pose):
+        quaternion = [pose_msg.orientation.x, pose_msg.orientation.y, pose_msg.orientation.z, pose_msg.orientation.w]
+        _, _, yaw = tf_transformations.euler_from_quaternion(quaternion)
+        pose = np.array([pose_msg.position.x, pose_msg.position.y, yaw])
+
         self.robot.pose_callback(pose)
 
 

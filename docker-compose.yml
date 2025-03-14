@@ -10,11 +10,11 @@ services:
     expose:
       - 5000
 
-  # test:
-  #   build:
-  #     context: .
-  #     dockerfile: ros.Dockerfile
-  #   network_mode: host
-  #   ipc: host
-  #   privileged: true
-  #   command: ros2 topic echo /cmd_drive
+  diff_drive_sim:
+    build:
+      context: .
+      dockerfile: ros.Dockerfile
+    network_mode: host
+    ipc: host
+    privileged: true
+    command: ros2 run drive_ros diff_drive_sim

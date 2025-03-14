@@ -3,7 +3,7 @@ ENV ROS_DISTRO=${ROS_DISTRO}
 SHELL ["/bin/bash", "-c"]
 
 # Updating and installing deps
-RUN apt-get update -y && apt-get install -y python3-pip
+RUN apt-get update -y && apt-get install -y python3-pip ros-humble-tf-transformations
 RUN pip install --upgrade pip setuptools wheel
 
 # Installing python module
