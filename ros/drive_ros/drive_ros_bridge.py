@@ -1,10 +1,11 @@
 import numpy as np
 import rclpy
-from DRIVE_AGAIN.drive import Drive
-from DRIVE_AGAIN.robot import Robot
-from DRIVE_AGAIN.sampling import RandomSampling
 from geometry_msgs.msg import Twist
 from rclpy.node import Node
+
+from DRIVE_AGAIN.drive import Drive, DriveStateEnum
+from DRIVE_AGAIN.robot import Robot
+from DRIVE_AGAIN.sampling import RandomSampling
 
 
 class DriveRosBridge(Node):
@@ -13,7 +14,7 @@ class DriveRosBridge(Node):
 
         initial_pose = np.array([0.0, 0.0, 0.0])
 
-        self.robot = Robot(initial_pose, self.send_command)
+        self.robot = Robot(initial_pose, self.send_command, lambda x: True)
         self.command_sampling_strategy = RandomSampling()
         self.drive = Drive(self.robot, self.command_sampling_strategy, step_duration_s=3.0)
 
@@ -31,7 +32,13 @@ class DriveRosBridge(Node):
         self.cmd_pub.publish(msg)
 
     def control_loop(self):
+        msg = Twist()
+        msg.linear.x = 69.0
+        msg.angular.z = 420.0
+        self.cmd_pub.publish(msg)
+
         current_time_ns = self.get_clock().now().nanoseconds
+        self.drive.start(current_time_ns)
         self.drive.run(current_time_ns)
 
     def loc_callback(self, pose):
