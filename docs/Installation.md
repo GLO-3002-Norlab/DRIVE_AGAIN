@@ -27,5 +27,5 @@ docker compose up -d
 5. Launch a teleoperation node to control the virtual robot
 
 ```bash
-docker exec -it drive_ros bash -c "source /opt/ros/humble/setup.bash && ros2 run teleop_twist_keyboard teleop_twist_keyboard"
+docker exec -it drive_ros bash -ic "ros2 run teleop_twist_keyboard teleop_twist_keyboard"
 ```

@@ -3,7 +3,6 @@ services:
     container_name: drive_ros
     build:
       context: .
-      dockerfile: ros.Dockerfile
     network_mode: host
     ipc: host
     privileged: true
@@ -15,7 +14,6 @@ services:
     container_name: diff_drive_sim
     build:
       context: .
-      dockerfile: ros.Dockerfile
     network_mode: host
     ipc: host
     privileged: true

@@ -1,10 +1,31 @@
-FROM python:3.10
+FROM osrf/ros:humble-desktop
+ENV ROS_DISTRO=${ROS_DISTRO}
+SHELL ["/bin/bash", "-c"]
 
-COPY pyproject.toml /app/pyproject.toml
-WORKDIR /app
-ENV PYTHONPATH=/app/src
+# Updating and installing deps
+RUN apt-get update -y && apt-get install -y python3-pip ros-${ROS_DISTRO}-tf-transformations
+RUN pip install --upgrade pip setuptools wheel
+
+# Installing python module
+RUN mkdir -p /home/root/DRIVE_AGAIN/src
+WORKDIR /home/root/DRIVE_AGAIN
+
+COPY pyproject.toml .
 RUN pip install -e .
+COPY src/ src/
 
-COPY . /app
+# Installing ros workspace
+RUN mkdir -p /home/root/ros2_ws/src
+WORKDIR /home/root/ros2_ws
 
-CMD ["python", "src/DRIVE_AGAIN/app.py"]
+COPY ros/ src/
+RUN rosdep install --from-paths src -y --ignore-src --rosdistro ${ROS_DISTRO}
+RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
+    colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+
+# Adding source to bashrc
+RUN echo "source /home/root/ros2_ws/install/setup.bash" >> /root/.bashrc
+
+COPY entrypoint.bash /
+ENTRYPOINT [ "/entrypoint.bash" ]
+CMD ["bash"]
