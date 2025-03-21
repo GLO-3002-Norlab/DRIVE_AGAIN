@@ -21,6 +21,7 @@ setup(
         "console_scripts": [
             "drive_ros_bridge = drive_ros.drive_ros_bridge:main",
             "diff_drive_sim = drive_ros.diff_drive_sim:main",
+            "keyboard_teleop = drive_ros.keyboard_teleop:main",
         ],
     },
 )
