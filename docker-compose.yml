@@ -1,0 +1,16 @@
+services:
+  drive_ros:
+    container_name: drive_ros
+    build:
+      context: .
+    # network_mode: host # This is to be used when running on real robots
+    ports:
+      - 5000:5000
+    command: ros2 run drive_ros drive_ros_bridge
+
+  diff_drive_sim:
+    container_name: diff_drive_sim
+    build:
+      context: .
+    # network_mode: host # This is to be used when running on real robots
+    command: ros2 run drive_ros diff_drive_sim

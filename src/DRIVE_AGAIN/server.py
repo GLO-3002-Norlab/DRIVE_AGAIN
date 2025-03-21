@@ -1,10 +1,12 @@
-import io
 import base64
-from matplotlib.figure import Figure
-import numpy as np
+import io
+
 import matplotlib.pyplot as plt
+import numpy as np
 from flask import Flask, render_template
 from flask_socketio import SocketIO
+from matplotlib.figure import Figure
+
 from DRIVE_AGAIN.common import Pose
 from DRIVE_AGAIN.plot import draw_input_space, draw_robot_visualization_figure
 
@@ -17,7 +19,7 @@ class Server:
         self.fig_input_space, self.ax_input_space = plt.subplots()
 
     def run(self):
-        self.socketio.run(self.app, host="0.0.0.0", debug=True, allow_unsafe_werkzeug=True)
+        self.socketio.run(self.app, host="0.0.0.0", debug=False, allow_unsafe_werkzeug=True, use_reloader=False)
 
     def encode_fig_to_b64(self, fig: Figure):
         buffer = io.BytesIO()
