@@ -13,6 +13,7 @@ git clone git@github.com:GLO-3002-Norlab/DRIVE_AGAIN.git
 2. Build the docker images
 
 ```bash
+cd DRIVE_AGAIN
 docker compose build
 ```
 
