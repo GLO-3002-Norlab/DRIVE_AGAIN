@@ -46,10 +46,6 @@ class Server:
         def index():
             return render_template("index.html")
 
-        @app.route("/metadata")
-        def metada():
-            return render_template("metadata.html")
-
         @socketio.on("start_drive")
         def start_drive():
             start_drive_cb()

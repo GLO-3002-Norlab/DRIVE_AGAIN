@@ -4,6 +4,17 @@ body {
   max-width: 100%;
 }
 
+.top-bar {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 10px;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
 .image-container {
   margin-top: 2rem;
   display: flex;

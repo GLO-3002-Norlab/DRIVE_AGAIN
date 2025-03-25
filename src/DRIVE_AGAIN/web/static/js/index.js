@@ -28,3 +28,52 @@ socket.on("robot_vizualisation_update", (data) => {
   document.getElementById("robot_viz").src =
     `data:image/png;base64,${data.image_data}`;
 });
+
+
+//
+// Forms
+//
+
+document.getElementById("roboticist-select").addEventListener("change", handleSelectChange);
+document.getElementById("robot-select").addEventListener("change", handleSelectChange);
+document.getElementById("terrain-select").addEventListener("change", handleSelectChange);
+
+function handleSelectChange(event) {
+  const selectElement = event.target;
+  const selectedValue = selectElement.value;
+
+  if (selectedValue === "new") {
+    openModal(selectElement.id);
+    selectElement.selectedIndex = 0;
+  }
+}
+
+function openModal(selectId) {
+  sessionStorage.setItem("currentSelect", selectId);
+  document.getElementById("modal").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+}
+
+document.getElementById("newOptionForm").addEventListener("submit", function (event) {
+  event.preventDefault();
+  const newOptionValue = document.getElementById("newOptionValue").value.trim();
+  const currentSelect = sessionStorage.getItem("currentSelect");
+
+  if (newOptionValue) {
+    const selectElement = document.getElementById(currentSelect);
+
+    const newOption = document.createElement("option");
+    newOption.value = newOptionValue.toLowerCase().replace(/\s+/g, "_");
+    newOption.textContent = newOptionValue;
+
+    const lastOption = selectElement.options[selectElement.options.length - 1];
+    selectElement.insertBefore(newOption, lastOption);
+
+    selectElement.value = newOption.value;
+
+    closeModal();
+  }
+});
