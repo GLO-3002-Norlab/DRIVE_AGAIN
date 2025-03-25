@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>DRIVE AGAIN</title>
+
+    <!-- External dependencies -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <!-- Custom -->
+    <link rel="stylesheet" href="/static/css/test.css" />
+  </head>
+
+<body>
+    <h1>Test image upload</h1>
+    <form class="image-form">
+        <label for="image-type">Image type:</label>
+        <select id="image-type">
+            <option value="1">Close up</option>
+            <option value="2">Area</option>
+            <option value="3">Robot</option>
+        </select>
+        <input type="file" id="image" accept="image/*" capture="camera">
+        <button type="submit">Upload</button>
+    </form>
+    <script defer="defer" src="/static/js/test.js"></script>
+  </body>
+</html>

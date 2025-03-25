@@ -1,0 +1,36 @@
+.image-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+body {
+  margin: 2rem;
+  padding: 0;
+  max-width: 100%;
+}
+
+/* .image-container { */
+/*   margin-top: 2rem; */
+/*   display: flex; */
+/*   flex-wrap: wrap; */
+/*   justify-content: center; */
+/*   align-items: center; */
+/*   max-width: 100%; */
+/* } */
+/**/
+/* .image-container img { */
+/*   flex: 1; */
+/*   width: 100%; */
+/* } */
+/**/
+/* @media (max-width: 600px) { */
+/*   .image-container { */
+/*     flex-direction: column; */
+/*   } */
+/* } */
+/**/
+/* #mainButton { */
+/*   width: 100%; */
+/*   max-width: 100%; */
+/* } */
