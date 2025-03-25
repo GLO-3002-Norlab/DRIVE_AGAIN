@@ -86,17 +86,7 @@
     </button>
   </div>
 
-  <div id="modal" class="modal">
-    <div class="modal-content">
-      <h3>Create New Option</h3>
-      <form id="newOptionForm">
-        <label for="newOptionValue">New Option:</label>
-        <input type="text" id="newOptionValue" required />
-        <button type="submit">Create</button>
-        <button type="button" onclick="closeModal()">Cancel</button>
-      </form>
-    </div>
-  </div>
+  {% include "modal.html" %}
 
   <script defer="defer" src="/static/js/index.js"></script>
 </body>
