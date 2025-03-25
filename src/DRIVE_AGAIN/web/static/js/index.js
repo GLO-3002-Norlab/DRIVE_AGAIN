@@ -50,6 +50,11 @@ function handleSelectChange(event) {
 
 function openModal(selectId) {
   sessionStorage.setItem("currentSelect", selectId);
+
+  document.querySelectorAll(".modal-form").forEach(form => form.style.display = "none");
+
+  document.getElementById(selectId + "-form").style.display = "block";
+
   document.getElementById("modal").style.display = "flex";
 }
 
@@ -57,23 +62,25 @@ function closeModal() {
   document.getElementById("modal").style.display = "none";
 }
 
-document.getElementById("newOptionForm").addEventListener("submit", function (event) {
-  event.preventDefault();
-  const newOptionValue = document.getElementById("newOptionValue").value.trim();
-  const currentSelect = sessionStorage.getItem("currentSelect");
+document.querySelectorAll(".modal-form").forEach(form => {
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    const newOptionValue = this.querySelector(".newOptionValue").value.trim();
+    const currentSelect = sessionStorage.getItem("currentSelect");
 
-  if (newOptionValue) {
-    const selectElement = document.getElementById(currentSelect);
+    if (newOptionValue) {
+      const selectElement = document.getElementById(currentSelect);
 
-    const newOption = document.createElement("option");
-    newOption.value = newOptionValue.toLowerCase().replace(/\s+/g, "_");
-    newOption.textContent = newOptionValue;
+      const newOption = document.createElement("option");
+      newOption.value = newOptionValue.toLowerCase().replace(/\s+/g, "_");
+      newOption.textContent = newOptionValue;
 
-    const lastOption = selectElement.options[selectElement.options.length - 1];
-    selectElement.insertBefore(newOption, lastOption);
+      const lastOption = selectElement.options[selectElement.options.length - 1];
+      selectElement.insertBefore(newOption, lastOption);
 
-    selectElement.value = newOption.value;
+      selectElement.value = newOption.value;
 
-    closeModal();
-  }
+      closeModal();
+    }
+  });
 });

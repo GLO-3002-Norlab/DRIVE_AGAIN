@@ -1,0 +1,29 @@
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <h3>Create New</h3>
+
+        <!-- Roboticist Form -->
+        <form id="roboticist-select-form" class="modal-form" style="display: none;">
+            <label for="newRoboticistValue">New Roboticist Name:</label>
+            <input type="text" class="newOptionValue" id="newRoboticistValue" required />
+            <button type="submit">Create</button>
+            <button type="button" onclick="closeModal()">Cancel</button>
+        </form>
+
+        <!-- Robot Form -->
+        <form id="robot-select-form" class="modal-form" style="display: none;">
+            <label for="newRobotValue">New Robot Name:</label>
+            <input type="text" class="newOptionValue" id="newRobotValue" required />
+            <button type="submit">Create</button>
+            <button type="button" onclick="closeModal()">Cancel</button>
+        </form>
+
+        <!-- Terrain Form -->
+        <form id="terrain-select-form" class="modal-form" style="display: none;">
+            <label for="newTerrainValue">New Terrain Name:</label>
+            <input type="text" class="newOptionValue" id="newTerrainValue" required />
+            <button type="submit">Create</button>
+            <button type="button" onclick="closeModal()">Cancel</button>
+        </form>
+    </div>
+</div>
