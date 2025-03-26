@@ -1,11 +1,26 @@
+<link rel="stylesheet" href="/static/css/modal.css" />
+
 <div id="modal" class="modal">
     <div class="modal-content">
         <h3>Create New</h3>
 
         <!-- Roboticist Form -->
         <form id="roboticist-select-form" class="modal-form" style="display: none;">
-            <label for="newRoboticistValue">New Roboticist Name:</label>
-            <input type="text" class="newOptionValue" id="newRoboticistValue" required />
+            <label for="newRoboticistName">First Name:</label>
+            <input type="text" class="newOptionValue" id="newRoboticistName" required />
+
+            <label for="newRoboticistLastName">Last Name:</label>
+            <input type="text" class="newOptionValue" id="newRoboticistLastName" required />
+
+            <label for="newRoboticistEmail">Contact Email:</label>
+            <input type="email" class="newOptionValue" id="newRoboticistEmail" required />
+
+            <label for="newRoboticistExperience">Years of Experience:</label>
+            <input type="number" class="newOptionValue" id="newRoboticistExperience" min="0" required />
+
+            <label for="newRoboticistOrg">Organization:</label>
+            <input type="text" class="newOptionValue" id="newRoboticistOrg" required />
+
             <button type="submit">Create</button>
             <button type="button" onclick="closeModal()">Cancel</button>
         </form>
