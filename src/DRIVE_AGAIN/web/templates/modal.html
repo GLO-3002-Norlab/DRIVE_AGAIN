@@ -1,11 +1,12 @@
 <link rel="stylesheet" href="/static/css/modal.css" />
+<script defer="defer" src="/static/js/modal.js"></script>
 
 <div id="modal" class="modal">
     <div class="modal-content">
-        <h3>Create New</h3>
-
         <!-- Roboticist Form -->
         <form id="roboticist-select-form" class="modal-form" style="display: none;">
+            <h3>Roboticist Information</h3>
+
             <label for="newRoboticistName">First Name:</label>
             <input type="text" class="newOptionValue" id="newRoboticistName" required />
 
@@ -27,14 +28,82 @@
 
         <!-- Robot Form -->
         <form id="robot-select-form" class="modal-form" style="display: none;">
-            <label for="newRobotValue">New Robot Name:</label>
-            <input type="text" class="newOptionValue" id="newRobotValue" required />
+            <h3>Robot Information</h3>
+
+            <fieldset>
+                <legend>Basic Information</legend>
+
+                <label for="robotName">Robot name:</label>
+                <input type="text" id="robotname" required />
+
+                <label for="robotManufacturer">Robot manufacturer and version:</label>
+                <input type="text" id="robotManufacturer" required />
+
+                <label>Have you modified the traction mechanism, motor drive, or battery?</label>
+                <select id="robotModification">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                </select>
+
+                <label for="robotWeight">Total weight of robot and sensor rack (kg):</label>
+                <input type="number" id="robotWeight" min="0" required />
+
+                <label>Noticed asymmetry in movement?</label>
+                <select id="robotAsymmetry">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                </select>
+
+                <label for="robotTraction">Traction Mechanism:</label>
+                <select id="robotTraction" onchange="updateTractionFields()">
+                    <option value="wheeled">Wheeled</option>
+                    <option value="tracked">Tracked</option>
+                    <option value="legged">Legged</option>
+                    <option value="other">Other</option>
+                </select>
+
+                <div id="traction-details"></div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Additional Specifications</legend>
+
+                <label>Does the vehicle have suspension?</label>
+                <select id="robotSuspension">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                </select>
+
+                <label for="robotBaseline">Measured baseline of vehicle (m):</label>
+                <input type="number" id="robotBaseline" min="0" step="0.01" required />
+
+                <label for="robotWheelRadius">Measured wheel radius under load (m):</label>
+                <input type="number" id="robotWheelRadius" min="0" step="0.01" required />
+            </fieldset>
+
+            <fieldset>
+                <legend>Ground Truth Information</legend>
+
+                <label for="robotSensors">Select sensors used in localization pipeline:</label>
+                <input type="text" id="robotSensors" placeholder="LIDAR, IMU, GPS..." required />
+
+                <label for="robotAlgorithm">Which algorithm is used to fuse these sensors?</label>
+                <input type="text" id="robotAlgorithm" placeholder="Provide links to papers or GitHub repos" required />
+
+                <label>Has the localization pipeline been tested at the highest robot speeds?</label>
+                <select id="robotSpeedTest">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                </select>
+            </fieldset>
+
             <button type="submit">Create</button>
             <button type="button" onclick="closeModal()">Cancel</button>
         </form>
 
         <!-- Terrain Form -->
         <form id="terrain-select-form" class="modal-form" style="display: none;">
+            <h3>Field Information</h3>
             <label for="newTerrainValue">New Terrain Name:</label>
             <input type="text" class="newOptionValue" id="newTerrainValue" required />
             <button type="submit">Create</button>
