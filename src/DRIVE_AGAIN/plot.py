@@ -10,8 +10,8 @@ from DRIVE_AGAIN.common import Pose
 
 def draw_robot_visualization_figure(ax: Axes, pose: Pose, geofence_points: np.ndarray, wheel_base: float) -> None:
     ax.clear()
-    ax.set_xlim(-5, 5)
-    ax.set_ylim(-5, 5)
+    ax.set_xlim(-50, 50)
+    ax.set_ylim(-50, 50)
     draw_incomplete_geofence(ax, geofence_points)
     draw_robot(ax, pose, wheel_base)
 
@@ -30,7 +30,7 @@ def draw_input_space(ax: Axes, commands: np.ndarray) -> None:
 
 
 def draw_robot(ax: Axes, pose: Pose, wheel_base: float) -> None:
-    x, y, yaw = pose
+    x, y, _, _, _, yaw = pose
 
     circle = matplotlib.patches.Circle((x, y), wheel_base / 2, color="green")
 

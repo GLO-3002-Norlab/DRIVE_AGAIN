@@ -1,7 +1,7 @@
 import numpy as np
 import rclpy
 import tf_transformations
-from geometry_msgs.msg import Pose, Twist
+from geometry_msgs.msg import PoseStamped, Twist
 from rclpy.node import Node
 
 
@@ -11,7 +11,7 @@ class DiffDriveSim(Node):
         self.pose = (0.0, 0.0, 0.0)
 
         self.cmd_sub = self.create_subscription(Twist, "cmd_vel", self.execute_command, 10)
-        self.loc_pub = self.create_publisher(Pose, "pose", 10)
+        self.loc_pub = self.create_publisher(PoseStamped, "pose", 10)
         self.loc_timer = self.create_timer(0.1, self.localize)
 
         self.get_logger().info("Diff drive sim node started")
@@ -32,13 +32,15 @@ class DiffDriveSim(Node):
 
         quat = tf_transformations.quaternion_from_euler(0.0, 0.0, noisy_pose[2])
 
-        pose_msg = Pose()
-        pose_msg.position.x = noisy_pose[0]
-        pose_msg.position.y = noisy_pose[1]
-        pose_msg.orientation.x = quat[0]
-        pose_msg.orientation.y = quat[1]
-        pose_msg.orientation.z = quat[2]
-        pose_msg.orientation.w = quat[3]
+        pose_msg = PoseStamped()
+        pose_msg.header.stamp = self.get_clock().now().to_msg()
+
+        pose_msg.pose.position.x = noisy_pose[0]
+        pose_msg.pose.position.y = noisy_pose[1]
+        pose_msg.pose.orientation.x = quat[0]
+        pose_msg.pose.orientation.y = quat[1]
+        pose_msg.pose.orientation.z = quat[2]
+        pose_msg.pose.orientation.w = quat[3]
 
         self.loc_pub.publish(pose_msg)
 
