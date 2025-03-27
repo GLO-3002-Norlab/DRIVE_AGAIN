@@ -1,36 +1,82 @@
-.image-form {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 body {
   margin: 2rem;
-  padding: 0;
   max-width: 100%;
 }
 
-/* .image-container { */
-/*   margin-top: 2rem; */
-/*   display: flex; */
-/*   flex-wrap: wrap; */
-/*   justify-content: center; */
-/*   align-items: center; */
-/*   max-width: 100%; */
-/* } */
-/**/
-/* .image-container img { */
-/*   flex: 1; */
-/*   width: 100%; */
-/* } */
-/**/
-/* @media (max-width: 600px) { */
-/*   .image-container { */
-/*     flex-direction: column; */
-/*   } */
-/* } */
-/**/
-/* #mainButton { */
-/*   width: 100%; */
-/*   max-width: 100%; */
-/* } */
+.parent {
+  max-width: 50%;
+}
+
+.image-type-select {
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.image-type-select label {
+  margin-right: 10px;
+}
+
+.image-type-select select {
+  width: 50%;
+}
+
+.drop-area {
+  border: 2px dashed #007bff;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.drop-label {
+  display: block;
+  cursor: pointer;
+}
+
+#file-input {
+  display: none; 
+}
+
+.carousel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  aspect-ratio: 16/9; 
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}
+
+.carousel-inner {
+  display: flex;
+  transition: transform 0.3s ease;
+}
+
+.carousel-inner img {
+  width: 100%; 
+  object-fit: contain; 
+  flex: 0 0 100%; 
+}
+
+.carousel-control {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  width: 2rem;
+  padding: 0;
+  height: 2.5rem; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.carousel-control.prev {
+  left: 1rem;
+}
+
+.carousel-control.next {
+  right: 1rem;
+}

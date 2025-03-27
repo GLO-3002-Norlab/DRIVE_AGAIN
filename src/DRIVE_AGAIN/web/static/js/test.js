@@ -1,53 +1,68 @@
 $(document).ready(function () {
-    $('.image-form').on('submit', function (e) {
-        e.preventDefault();
-        console.log(e);
-        console.log("form submitted");
-    });
-});
+  let images = [];
+  let currentIndex = 0;
 
-    // $('#image-input').on('change', function (event) {
-    //     const file = event.target.files[0];
-    //     if (file) {
-    //         const reader = new FileReader();
-    //         reader.onload = () => {
-    //             $('#image-preview').attr('src', e.target.result);
-    //
-    //             const base64Image = reader.result;
-    //             socket.emit('sendImage'), base64Image);
-    //         };
-    //     }
-    // });
-//
-// function previewFiles() {
-//   const preview = document.querySelector("#preview");
-//   const files = document.querySelector("input[type=file]").files;
-//
-//   function readAndPreview(file) {
-//     // Make sure `file.name` matches our extensions criteria
-//     if (/\.(jpe?g|png|gif)$/i.test(file.name)) {
-//       const reader = new FileReader();
-//
-//       reader.addEventListener(
-//         "load",
-//         () => {
-//           const image = new Image();
-//           image.height = 100;
-//           image.title = file.name;
-//           image.src = reader.result;
-//           preview.appendChild(image);
-//         },
-//         false,
-//       );
-//
-//       reader.readAsDataURL(file);
-//     }
-//   }
-//
-//   if (files) {
-//     Array.prototype.forEach.call(files, readAndPreview);
-//   }
-// }
-//
-// const picker = document.querySelector("#browse");
-// picker.addEventListener("change", previewFiles);
+  $(".drop-area")
+    .on("dragover", function (e) {
+      e.preventDefault();
+      $(this).addClass("dragging");
+    })
+    .on("dragleave", function () {
+      $(this).removeClass("dragging");
+    })
+    .on("drop", function (e) {
+      e.preventDefault();
+      $(this).removeClass("dragging");
+      handleFiles(e.originalEvent.dataTransfer.files);
+    });
+
+  $("#file-input").on("change", function (e) {
+    handleFiles(e.target.files);
+  });
+
+  function handleFiles(files) {
+    Array.from(files)
+      .filter((file) => file.type.startsWith("image/"))
+      .forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          images.push(e.target.result);
+          updateCarousel();
+        };
+        reader.readAsDataURL(file);
+      });
+  }
+
+  function updateCarousel() {
+    const $carouselInner = $(".carousel-inner");
+    $carouselInner.empty();
+
+    images.forEach((src) => {
+      $carouselInner.append(`<img src="${src}" class="carousel-image" />`);
+    });
+
+    $carouselInner.css("transform", `translateX(-${currentIndex * 100}%)`);
+  }
+
+  $(".carousel-control.prev").on("click", function () {
+    if (images.length > 0) {
+      currentIndex = (currentIndex - 1 + images.length) % images.length;
+      updateCarouselPosition();
+    }
+  });
+
+  $(".carousel-control.next").on("click", function () {
+    if (images.length > 0) {
+      currentIndex = (currentIndex + 1) % images.length;
+      updateCarouselPosition();
+    }
+  });
+
+  function updateCarouselPosition() {
+    console.log(currentIndex);
+    $(".carousel-inner").css(
+      "transform",
+      `translateX(-${currentIndex * 100}%)`
+    );
+  }
+});

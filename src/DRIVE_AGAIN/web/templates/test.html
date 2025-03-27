@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -7,25 +7,44 @@
     <title>DRIVE AGAIN</title>
 
     <!-- External dependencies -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@glidejs/glide@3.3.0/dist/css/glide.core.min.css"
+    />
+
+    <script src="https://unpkg.com/@glidejs/glide@3.3.0/dist/glide.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <!-- Custom -->
     <link rel="stylesheet" href="/static/css/test.css" />
   </head>
-
-<body>
-    <h1>Test image upload</h1>
-    <form class="image-form">
-        <label for="image-type">Image type:</label>
+  <body>
+    <div class="parent">
+      <div class="image-type-select">
+        <label for="image-type">Image Type:</label>
         <select id="image-type">
-            <option value="1">Close up</option>
-            <option value="2">Area</option>
-            <option value="3">Robot</option>
+          <option value="robot">Robot</option>
+          <option value="close-up">Close-up</option>
+          <option value="area">Area</option>
+          <option value="other">Other</option>
         </select>
-        <input type="file" id="image" accept="image/*" capture="camera">
-        <button type="submit">Upload</button>
-    </form>
+      </div>
+      <div class="drop-area">
+        <label for="file-input" class="drop-label">
+          <p>Drag and drop images here, or click to browse.</p>
+        </label>
+        <input type="file" id="file-input" accept="image/*" multiple />
+      </div>
+      <div class="carousel">
+        <div class="carousel-inner"></div>
+        <button class="carousel-control prev">&lt;</button>
+        <button class="carousel-control next">&gt;</button>
+      </div>
+    </div>
     <script defer="defer" src="/static/js/test.js"></script>
   </body>
 </html>
