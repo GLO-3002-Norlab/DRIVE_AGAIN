@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>DRIVE AGAIN</title>
+
+    <!-- External dependencies -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <!-- Custom -->
+    <link rel="stylesheet" href="/static/css/test.css" />
+  </head>
+  <body>
+    <div class="parent">
+      <div class="image-type-select">
+        <label for="image-type">Image Type:</label>
+        <select id="image-type">
+          <option value="robot">Robot</option>
+          <option value="close-up">Close-up</option>
+          <option value="area">Area</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="drop-area">
+        <label for="file-input" class="drop-label">
+          <p>Drag and drop images here, or click to browse.</p>
+        </label>
+        <input type="file" id="file-input" accept="image/*" multiple />
+      </div>
+      <div class="carousel">
+        <div class="carousel-inner"></div>
+        <button class="carousel-control prev">&lt;</button>
+        <button class="carousel-control next">&gt;</button>
+      </div>
+    </div>
+    <script defer="defer" src="/static/js/test.js"></script>
+  </body>
+</html>

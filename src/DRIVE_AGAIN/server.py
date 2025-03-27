@@ -50,6 +50,10 @@ class Server:
         def metada():
             return render_template("metadata.html")
 
+        @app.route("/test")
+        def test():
+            return render_template("test.html")
+
         @socketio.on("start_drive")
         def start_drive():
             start_drive_cb()
