@@ -1,24 +1,22 @@
 import csv
 import os
+from pathlib import Path
 from typing import Any
 
-from data.robot_data import RobotData
 
+class CSVUtil:
+    folder: Path
 
-# TODO : Find a better name for this class
-class DataUtil:
-    folder: str
-
-    def __init__(self, folder: str) -> None:
+    def __init__(self, folder: Path) -> None:
         self.folder = folder
 
         if not os.path.isdir(self.folder):
             os.makedirs(self.folder)
 
-    def exportCSV(self, obj: dict, fileName: str) -> None:
+    def export_csv(self, obj: dict, fileName: Path) -> None:
         assert os.path.isdir(self.folder)
 
-        f = open(self.folder + "/" + fileName, mode="w", newline="")
+        f = open(self.folder / fileName, mode="w", newline="")
 
         writer = csv.DictWriter(f, fieldnames=obj.keys())
         writer.writeheader()
@@ -26,10 +24,10 @@ class DataUtil:
 
         f.close()
 
-    def importCSV(self, fileName: str) -> Any:
+    def import_csv(self, fileName: str) -> Any:
         assert os.path.isdir(self.folder)
 
-        f = open(self.folder + "/" + fileName, mode="r")
+        f = open(self.folder / fileName, mode="r")
 
         reader = csv.DictReader(f)
         obj = [row for row in reader][0]
