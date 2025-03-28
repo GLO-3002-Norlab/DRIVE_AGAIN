@@ -54,7 +54,6 @@ class DriveRosBridge(Node):
 
         # Drive core setup
         self.robot = Robot(initial_pose, self.send_command, lambda x: True)
-        self.robot.deadman_switch_callback(True)
         self.command_sampling_strategy = RandomSampling()
         self.drive = Drive(self.robot, self.command_sampling_strategy)
         self.server = Server(self.start_drive_cb, self.start_geofence_cb)
@@ -66,6 +65,7 @@ class DriveRosBridge(Node):
         # ROS setup
         self.cmd_pub = self.create_publisher(Twist, "cmd_vel", 10)
         self.loc_sub = self.create_subscription(Pose, "pose", self.loc_callback, 10)
+        self.deadman_sub = self.create_subscription(Bool, "deadman", self.deadman_callback, 10)
         self.timer = self.create_timer(0.1, self.control_loop)
 
         self.get_logger().info("Drive ROS bridge started")
@@ -102,6 +102,9 @@ class DriveRosBridge(Node):
         pose = np.array([pose_msg.position.x, pose_msg.position.y, yaw])
 
         self.robot.pose_callback(pose)
+
+    def deadman_callback(self, msg: Bool):
+        self.robot.deadman_switch_callback(msg.data)
 
 
 def main(args=None):
