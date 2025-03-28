@@ -78,12 +78,12 @@ class DriveRosBridge(Node):
 
     def start_geofence_cb(self):
         current_time_ns = self.get_clock().now().nanoseconds
+        self.update_timestamp()
         self.drive.start_geofence(current_time_ns)
 
-    # TODO
     def skip_command_cb(self):
-        self.get_logger().info("SKIPPING COMMAND YEY")
-        pass
+        current_time_ns = self.get_clock().now().nanoseconds
+        self.drive.skip_current_step(current_time_ns)
 
     def send_command(self, command):
         msg = Twist()

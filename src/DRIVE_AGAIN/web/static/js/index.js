@@ -1,8 +1,6 @@
 const socket = io();
 let stage = 0;
 
-console.log("something printed")
-
 function skipCommandButtonClick() {
   socket.emit("skip_command");
 }
