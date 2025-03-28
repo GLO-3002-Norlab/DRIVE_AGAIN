@@ -24,7 +24,7 @@ class DriveRosBridge(Node):
         self.robot = Robot(initial_pose, self.send_command, lambda x: True)
         self.command_sampling_strategy = RandomSampling()
         self.drive = Drive(self.robot, self.command_sampling_strategy, step_duration_s=3.0)
-        self.server = Server(self.start_drive_cb, self.start_geofence_cb)
+        self.server = Server(self.start_drive_cb, self.start_geofence_cb, self.skip_command_cb)
 
         # Interface setup
         self.interface_thread = Thread(target=self.server.run)
@@ -42,6 +42,11 @@ class DriveRosBridge(Node):
 
     def start_geofence_cb(self):
         self.drive.change_state(DriveStateEnum.geofence_creation)
+
+    # TODO
+    def skip_command_cb(self):
+        self.get_logger().info("SKIPPING COMMAND YEY")
+        pass
 
     def send_command(self, command):
         msg = Twist()
