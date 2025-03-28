@@ -101,7 +101,7 @@ class DriveRosBridge(Node):
         self.server.update_robot_viz(self.robot.pose, geofence_points, WHEEL_BASE)
         self.server.update_input_space(self.drive.get_commands())
 
-        if self.drive.is_skippable():
+        if self.drive.can_skip_command():
             self.server.skippable_state_start()
         else:
             self.server.skippable_state_end()
