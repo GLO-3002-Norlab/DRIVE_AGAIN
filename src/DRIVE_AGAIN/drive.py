@@ -65,6 +65,7 @@ class RunningState(DriveState):
     def run(self, timestamp_ns: float):
         current_step: Step = self.drive.current_step
 
+        # TODO: https://github.com/GLO-3002-Norlab/DRIVE_AGAIN/issues/44
         # If outside geofence, return to center
         # current_point = self.drive.robot.pose[:2]
         # geofence = self.drive.geofence
@@ -104,7 +105,10 @@ class Drive:
         self.commands = []
 
     def run(self, timestamp_ns: float):
-        self.current_state.run(timestamp_ns)  # type: ignore
+        if self.robot.deadman_switch_pressed:
+            self.current_state.run(timestamp_ns)
+        else:
+            logging.info(f"Deadman switch not pressed")
 
     def sample_next_step(self, timestamp_ns: float):
         command = self.command_sampling_strategy.sample_command()

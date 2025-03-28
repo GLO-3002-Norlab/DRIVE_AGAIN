@@ -5,6 +5,7 @@ import numpy as np
 import rclpy
 import tf_transformations
 from geometry_msgs.msg import Pose, Twist
+from std_msgs.msg import Bool
 from rclpy.node import Node
 
 from DRIVE_AGAIN.drive import Drive
@@ -53,6 +54,7 @@ class DriveRosBridge(Node):
 
         # Drive core setup
         self.robot = Robot(initial_pose, self.send_command, lambda x: True)
+        self.robot.deadman_switch_callback(True)
         self.command_sampling_strategy = RandomSampling()
         self.drive = Drive(self.robot, self.command_sampling_strategy)
         self.server = Server(self.start_drive_cb, self.start_geofence_cb)
