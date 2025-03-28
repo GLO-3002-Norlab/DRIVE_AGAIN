@@ -97,6 +97,15 @@
                 </select>
             </fieldset>
 
+            <fieldset>
+                <legend>Picture</legend>
+
+                <label for="robot-image">Upload Robot Picture:</label>
+                <input type="file" id="robot-image" name="robot-image" accept="image/*">
+                <img id="robot-preview" src="" alt="Robot Preview"
+                    style="display: none; max-width: 100%; margin-top: 10px;">
+            </fieldset>
+
             <button type="submit">Create</button>
             <button type="button" onclick="closeModal()">Cancel</button>
         </form>
@@ -171,6 +180,25 @@
                     <option value="no">No</option>
                     <option value="yes">Yes</option>
                 </select>
+            </fieldset>
+
+            <fieldset>
+                <legend>Pictures</legend>
+
+                <label for="robot-env-image">Upload Robot in Environment Picture:</label>
+                <input type="file" id="robot-env-image" name="robot-env-image" accept="image/*">
+                <img id="robot-env-preview" src="" alt="Robot in Environment Preview"
+                    style="display: none; max-width: 100%; margin-top: 10px;">
+
+                <label for="env-image">Upload Environment Picture:</label>
+                <input type="file" id="env-image" name="env-image" accept="image/*">
+                <img id="env-preview" src="" alt="Environment Preview"
+                    style="display: none; max-width: 100%; margin-top: 10px;">
+
+                <label for="ground-image">Upload Ground Closeup Picture:</label>
+                <input type="file" id="ground-image" name="ground-image" accept="image/*">
+                <img id="ground-preview" src="" alt="Ground Closeup Preview"
+                    style="display: none; max-width: 100%; margin-top: 10px;">
             </fieldset>
 
             <button type="submit">Create</button>
