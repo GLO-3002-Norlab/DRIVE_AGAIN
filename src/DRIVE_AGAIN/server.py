@@ -38,6 +38,12 @@ class Server:
 
         self.socketio.emit("input_space_update", {"image_data": input_space_b64})
 
+    def skippable_state_start(self):
+        self.socketio.emit("skippable_state_start")
+
+    def skippable_state_end(self):
+        self.socketio.emit("skippable_state_end")
+
     def create_server(self, start_drive_cb, start_geofencing_cb, skip_command_cb):
         app = Flask(__name__, static_url_path="/static", static_folder="web/static", template_folder="web/templates")
         socketio = SocketIO(app)

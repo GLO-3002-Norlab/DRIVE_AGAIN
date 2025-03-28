@@ -31,6 +31,14 @@ socket.on("robot_vizualisation_update", (data) => {
   ).src = `data:image/png;base64,${data.image_data}`;
 });
 
+socket.on("skippable_state_start", (data) => {
+  document.getElementById("skip-command-button").disabled = false;
+});
+
+socket.on("skippable_state_end", (data) => {
+  document.getElementById("skip-command-button").disabled = true;
+});
+
 
 //
 // Forms

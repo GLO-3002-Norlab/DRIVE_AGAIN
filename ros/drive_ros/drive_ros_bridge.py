@@ -101,6 +101,11 @@ class DriveRosBridge(Node):
         self.server.update_robot_viz(self.robot.pose, geofence_points, WHEEL_BASE)
         self.server.update_input_space(self.drive.get_commands())
 
+        if self.drive.is_skippable():
+            self.server.skippable_state_start()
+        else:
+            self.server.skippable_state_end()
+
     def loc_callback(self, pose_msg: Pose):
         quaternion = [pose_msg.orientation.x, pose_msg.orientation.y, pose_msg.orientation.z, pose_msg.orientation.w]
         _, _, yaw = tf_transformations.euler_from_quaternion(quaternion)

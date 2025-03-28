@@ -192,3 +192,6 @@ class Drive:
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "stop_drive")
+
+    def is_skippable(self) -> bool:
+        return self.current_state.__class__ == RunningState or self.current_state.__class__ == PausedState
