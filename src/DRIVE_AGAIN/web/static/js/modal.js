@@ -32,6 +32,25 @@ function updateTractionFields() {
     }
 }
 
+function updateParticleSizeField() {
+    const terrainHardness = document.getElementById("terrainHardness").value;
+    const container = document.getElementById("particle-size-container");
+    container.innerHTML = "";
+
+    if (terrainHardness === "deformable") {
+        container.innerHTML = `
+        <label for="particleSize">If deformable, specify the most present particle size:</label>
+        <select id="particleSize">
+          <option value="clay">Smaller than 0.05 mm (clay)</option>
+          <option value="sand">0.05 mm to 2.0 mm (sand)</option>
+          <option value="small_gravel">2.0 mm to 20 mm (small gravel)</option>
+          <option value="big_gravel">20 mm to 63 mm (big gravel)</option>
+          <option value="cobbles">Over 63 mm (Cobbles)</option>
+        </select>
+      `;
+    }
+}
+
 document.getElementById("robot-select-form").addEventListener("submit", function (event) {
     event.preventDefault();
 
@@ -74,6 +93,47 @@ document.getElementById("robot-select-form").addEventListener("submit", function
     const newOption = document.createElement("option");
     newOption.value = newRobotName.toLowerCase().replace(/\s+/g, "_");
     newOption.textContent = newRobotName;
+
+    const lastOption = selectElement.options[selectElement.options.length - 1];
+    selectElement.insertBefore(newOption, lastOption);
+    selectElement.value = newOption.value;
+
+    closeModal();
+});
+
+document.getElementById("terrain-select-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const terrainType = document.getElementById("terrainType").value.trim();
+    const terrainUniform = document.getElementById("terrainUniform").value;
+    const terrainHardness = document.getElementById("terrainHardness").value;
+    const terrainInclination = document.getElementById("terrainInclination").value.trim();
+    const terrainFlatness = document.getElementById("terrainFlatness").value;
+    const terrainWetness = document.getElementById("terrainWetness").value;
+    const terrainContamination = document.getElementById("terrainContamination").value.trim();
+
+    let particleSize = "";
+    if (terrainHardness === "deformable") {
+        particleSize = document.getElementById("particleSize").value;
+    }
+
+    const weatherCondition = document.getElementById("weatherCondition").value.trim();
+    const weatherDayNight = document.getElementById("weatherDayNight").value;
+    const weatherTemperature = document.getElementById("weatherTemperature").value.trim();
+    const weatherGroundFrozen = document.getElementById("weatherGroundFrozen").value;
+    const weatherFreezeLastNight = document.getElementById("weatherFreezeLastNight").value;
+
+    if (!terrainType || !terrainInclination || !weatherCondition || !weatherTemperature) {
+        alert("Please fill out all required fields.");
+        return;
+    }
+
+    const newTerrainName = `${terrainType} - ${weatherCondition} (${weatherTemperature}°C)`;
+
+    const selectElement = document.getElementById("terrain-select");
+    const newOption = document.createElement("option");
+    newOption.value = newTerrainName.toLowerCase().replace(/\s+/g, "_");
+    newOption.textContent = newTerrainName;
 
     const lastOption = selectElement.options[selectElement.options.length - 1];
     selectElement.insertBefore(newOption, lastOption);
