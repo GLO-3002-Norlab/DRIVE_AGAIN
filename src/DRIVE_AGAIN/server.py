@@ -12,8 +12,10 @@ from DRIVE_AGAIN.plot import draw_input_space, draw_robot_visualization_figure
 
 
 class Server:
-    def __init__(self, start_drive_cb, start_geofencing_cb, skip_command_cb):
-        self.app, self.socketio = self.create_server(start_drive_cb, start_geofencing_cb, skip_command_cb)
+    def __init__(self, start_drive_cb, start_geofencing_cb, skip_command_cb, stop_drive_cb):
+        self.app, self.socketio = self.create_server(
+            start_drive_cb, start_geofencing_cb, skip_command_cb, stop_drive_cb
+        )
 
         self.fig_viz, self.ax_viz = plt.subplots()
         self.fig_input_space, self.ax_input_space = plt.subplots()
@@ -38,7 +40,7 @@ class Server:
 
         self.socketio.emit("input_space_update", {"image_data": input_space_b64})
 
-    def create_server(self, start_drive_cb, start_geofencing_cb, skip_command_cb):
+    def create_server(self, start_drive_cb, start_geofencing_cb, skip_command_cb, stop_drive_cb):
         app = Flask(__name__, static_url_path="/static", static_folder="web/static", template_folder="web/templates")
         socketio = SocketIO(app)
 
@@ -57,5 +59,9 @@ class Server:
         @socketio.on("skip_command")
         def skip_command():
             skip_command_cb()
+
+        @socketio.on("stop_drive")
+        def stop_drive():
+            stop_drive_cb()
 
         return app, socketio
