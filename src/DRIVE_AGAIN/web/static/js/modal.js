@@ -141,3 +141,23 @@ document.getElementById("terrain-select-form").addEventListener("submit", functi
 
     closeModal();
 });
+
+function setupImagePreview(inputId, previewId) {
+    document.getElementById(inputId).addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const preview = document.getElementById(previewId);
+                preview.src = e.target.result;
+                preview.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+setupImagePreview("robot-image", "robot-preview");
+setupImagePreview("robot-env-image", "robot-env-preview");
+setupImagePreview("env-image", "env-preview");
+setupImagePreview("ground-image", "ground-preview");
