@@ -26,7 +26,7 @@ class DriveRosBridge(Node):
         self.robot = Robot(initial_pose, self.send_command, lambda x: True)
         self.command_sampling_strategy = RandomSampling()
         self.drive = Drive(self.robot, self.command_sampling_strategy, step_duration_s=3.0)
-        experience_dir = os.path.join("home", "root", "datasets", "test")
+        experience_dir = os.path.join("/home", "root", "datasets", "test")
         self.dataset_recorder = DatasetRecorder(experience_dir)
         self.server = Server(self.start_drive_cb, self.start_geofence_cb, self.dataset_recorder.save_experience)
 
