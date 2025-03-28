@@ -1,7 +1,7 @@
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-import logging
 
 import numpy as np
 
@@ -122,6 +122,9 @@ class Drive:
 
         self.current_state = RunningState(self, timestamp_ns, self.current_step)
 
+    def skip_current_step(self, timestamp_ns: float):
+        self.sample_next_step(timestamp_ns)
+
     def get_commands(self) -> np.ndarray:
         if self.current_state.__class__ == RunningState:
             return np.array(self.commands)
@@ -194,3 +197,6 @@ class Drive:
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "stop_drive")
+
+    def can_skip_command(self) -> bool:
+        return self.current_state.__class__ == RunningState or self.current_state.__class__ == PausedState
