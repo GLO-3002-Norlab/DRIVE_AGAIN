@@ -1,33 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>DRIVE AGAIN</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- External dependencies -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css"
-    />
+  <title>DRIVE AGAIN</title>
 
-    <!-- Custom -->
-    <link rel="stylesheet" href="/static/css/index.css" />
-  </head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css" />
+  <link rel="stylesheet" href="/static/css/index.css" />
+</head>
 
-  <body>
-    <main>
-      <button id="mainButton" onclick="handleButtonClick()">
-        Start Geofencing
-      </button>
-      <div class="image-container">
-        <img id="robot_viz" />
-        <img id="input_space" />
-      </div>
-    </main>
+<body>
+  <div class="top-bar">
+    <select id="roboticist-select">
+      <option value="">Select Roboticist</option>
+      <option value="roboticist1">Roboticist 1</option>
+      <option value="roboticist2">Roboticist 2</option>
+      <option value="new">+ Create New</option>
+    </select>
 
-    <script defer="defer" src="/static/js/index.js"></script>
-  </body>
+    <select id="robot-select">
+      <option value="">Select Robot</option>
+      <option value="robot1">Robot 1</option>
+      <option value="robot2">Robot 2</option>
+      <option value="new">+ Create New</option>
+    </select>
+
+    <select id="terrain-select">
+      <option value="">Select Terrain</option>
+      <option value="terrain1">Terrain 1</option>
+      <option value="terrain2">Terrain 2</option>
+      <option value="new">+ Create New</option>
+    </select>
+  </div>
+
+  <main class="image-container">
+    <img id="robot_viz" />
+    <img id="input_space" />
+  </main>
+
+  <div class="bottom-bar">
+    <button id="mainButton" onclick="handleButtonClick()">
+      Start Geofencing
+    </button>
+  </div>
+
+  {% include "modal.html" %}
+
+  <script defer="defer" src="/static/js/index.js"></script>
+</body>
+
 </html>
