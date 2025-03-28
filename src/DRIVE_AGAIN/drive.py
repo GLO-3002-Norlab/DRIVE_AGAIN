@@ -63,6 +63,11 @@ class RunningState(DriveState):
         self.step_duration_s = 6.0
 
     def run(self, timestamp_ns: float):
+        if not self.drive.robot.deadman_switch_pressed:
+            logging.info("Deadman switch not pressed, pausing drive")
+            self.drive.pause_drive(timestamp_ns)
+            return
+
         current_step: Step = self.drive.current_step
 
         # TODO: https://github.com/GLO-3002-Norlab/DRIVE_AGAIN/issues/44
@@ -85,7 +90,10 @@ class RunningState(DriveState):
 
 class PausedState(DriveState):
     def run(self, timestamp_ns: float):
-        pass
+        if self.drive.robot.deadman_switch_pressed:
+            logging.info("Deadman switch pressed, resuming drive")
+            self.drive.resume_drive(timestamp_ns)
+            return
 
 
 class StoppedState(DriveState):
@@ -105,10 +113,7 @@ class Drive:
         self.commands = []
 
     def run(self, timestamp_ns: float):
-        if self.robot.deadman_switch_pressed:
-            self.current_state.run(timestamp_ns)
-        else:
-            logging.info(f"Deadman switch not pressed")
+        self.current_state.run(timestamp_ns)
 
     def sample_next_step(self, timestamp_ns: float):
         command = self.command_sampling_strategy.sample_command()
