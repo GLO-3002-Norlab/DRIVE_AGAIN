@@ -57,7 +57,7 @@ class DriveRosBridge(Node):
         self.robot.deadman_switch_callback(True)
         self.command_sampling_strategy = RandomSampling()
         self.drive = Drive(self.robot, self.command_sampling_strategy)
-        self.server = Server(self.start_drive_cb, self.start_geofence_cb, self.skip_command_cb)
+        self.server = Server(self.start_drive_cb, self.start_geofence_cb, self.skip_command_cb, self.stop_drive_cb)
 
         # Interface setup
         self.interface_thread = Thread(target=self.server.run)
@@ -78,12 +78,16 @@ class DriveRosBridge(Node):
 
     def start_geofence_cb(self):
         current_time_ns = self.get_clock().now().nanoseconds
-        self.update_timestamp()
         self.drive.start_geofence(current_time_ns)
 
     def skip_command_cb(self):
         current_time_ns = self.get_clock().now().nanoseconds
         self.drive.skip_current_step(current_time_ns)
+
+    def stop_drive_cb(self):
+        self.get_logger().info("STOPPING DRIVE (opens modal)")
+        current_time_ns = self.get_clock().now().nanoseconds
+        self.drive.stop_drive(current_time_ns)
 
     def send_command(self, command):
         msg = Twist()

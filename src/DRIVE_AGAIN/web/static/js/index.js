@@ -5,8 +5,22 @@ function skipCommandButtonClick() {
   socket.emit("skip_command");
 }
 
+function stopButtonClick() {
+  const button = document.getElementById("mainButton");
+  const stopButton = document.getElementById("stop-button");
+
+  if (stage > 1) {
+    socket.emit("stop_drive");
+    button.textContent = "Start Drive";
+    button.disabled = false;
+    stage = 1;
+    stopButton.disabled = true;
+  }
+}
+
 function handleButtonClick() {
   const button = document.getElementById("mainButton");
+  const stopButton = document.getElementById("stop-button");
 
   if (stage === 0) {
     socket.emit("start_geofencing");
@@ -15,6 +29,7 @@ function handleButtonClick() {
     socket.emit("start_drive");
     button.textContent = "Drive Started";
     button.disabled = true;
+    stopButton.disabled = false;
   }
   stage++;
 }
