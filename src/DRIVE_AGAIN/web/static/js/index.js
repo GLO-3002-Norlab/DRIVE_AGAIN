@@ -19,6 +19,13 @@ function saveDataset() {
   socket.emit("save_dataset");
 }
 
+function saveDataset(event) {
+  event.preventDefault();
+  const datasetName = document.getElementById("dataset-name-input").value;
+  socket.emit("save_dataset", { name: datasetName });
+  console.log("Dataset saved with name:", datasetName);
+}
+
 socket.on("input_space_update", (data) => {
   document.getElementById("input_space").src =
     `data:image/png;base64,${data.image_data}`;

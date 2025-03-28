@@ -59,7 +59,8 @@ class Server:
             start_geofencing_cb()
 
         @socketio.on("save_dataset")
-        def save_dataset():
-            save_dataset_cb()
+        def save_dataset(data):
+            dataset_name = data.get("name")
+            save_dataset_cb(dataset_name)
 
         return app, socketio

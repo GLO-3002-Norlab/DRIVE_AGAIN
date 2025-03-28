@@ -8,8 +8,8 @@ class DatasetRecorder:
     STEPS_FILENAME = "steps.csv"
     POSITIONS_FILENAME = "positions.csv"
 
-    def __init__(self, save_folder_path: str):
-        self.save_folder_path = save_folder_path
+    def __init__(self, datasets_folder: str):
+        self.datasets_folder = datasets_folder
         self.step_id = 0
 
         self.positions_recorder = CsvWriter(Position6DOF.headers())
@@ -18,10 +18,10 @@ class DatasetRecorder:
         self.current_command: Command | None = None
 
     def save_command(self, command: Command, timestamp_ns: int):
+        if self.current_command is not None and is_same_command(command, self.current_command):
+            return
         if self.current_command is None:
             self.current_command = command
-        elif is_same_command(command, self.current_command):
-            return
 
         new_step = DriveStep(timestamp_ns, self.step_id, *command)
         self.step_recorder.save_line(new_step)
@@ -31,12 +31,14 @@ class DatasetRecorder:
         pose_6DOF = Position6DOF(timestamp_ns, self.step_id, *pose)
         self.positions_recorder.save_line(pose_6DOF)
 
-    def save_experience(self):
-        if not os.path.exists(self.save_folder_path):
-            os.makedirs(self.save_folder_path)
+    def save_experience(self, dataset_name: str):
+        save_folder_path = os.path.join(self.datasets_folder, dataset_name)
 
-        positions_filepath = os.path.join(self.save_folder_path, self.POSITIONS_FILENAME)
-        steps_filepath = os.path.join(self.save_folder_path, self.STEPS_FILENAME)
+        if not os.path.exists(save_folder_path):
+            os.makedirs(save_folder_path)
+
+        positions_filepath = os.path.join(save_folder_path, self.POSITIONS_FILENAME)
+        steps_filepath = os.path.join(save_folder_path, self.STEPS_FILENAME)
 
         self.positions_recorder.save_data_to_file(positions_filepath)
         self.step_recorder.save_data_to_file(steps_filepath)
