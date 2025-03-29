@@ -15,14 +15,7 @@ class DatasetRecorder:
         self.positions_recorder = CsvWriter(Position6DOF.headers())
         self.step_recorder = CsvWriter(DriveStep.headers())
 
-        self.current_command: Command | None = None
-
     def save_command(self, command: Command, timestamp_ns: int):
-        if self.current_command is not None and is_same_command(command, self.current_command):
-            return
-        if self.current_command is None:
-            self.current_command = command
-
         new_step = DriveStep(timestamp_ns, self.step_id, *command)
         self.step_recorder.save_line(new_step)
         self.step_id += 1
@@ -30,6 +23,10 @@ class DatasetRecorder:
     def save_pose(self, pose: Pose, timestamp_ns: int):
         pose_6DOF = Position6DOF(timestamp_ns, self.step_id, *pose)
         self.positions_recorder.save_line(pose_6DOF)
+
+    def save_poses(self, poses_array):
+        for pose, timestamp_ns in poses_array:
+            self.save_pose(pose, timestamp_ns)
 
     def save_experience(self, dataset_name: str):
         save_folder_path = os.path.join(self.datasets_folder, dataset_name)

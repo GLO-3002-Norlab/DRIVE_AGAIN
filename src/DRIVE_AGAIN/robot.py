@@ -11,9 +11,17 @@ class Robot:
         self.send_command_fn = send_command_fn
         self.send_goal_fn = send_goal_fn
         self.goal_reached = False
+        self.poses_buffer = []
 
-    def pose_callback(self, pose: Pose) -> None:
+    def pose_callback(self, pose: Pose, timestamp_ns: int) -> None:
+        self.poses_buffer.append((pose, timestamp_ns))
         self.pose = pose
+
+    def get_poses(self):
+        return self.poses_buffer
+
+    def empty_pose_buffer(self):
+        self.poses_buffer = []
 
     def deadman_switch_callback(self, pressed: bool) -> None:
         self.deadman_switch_pressed = pressed

@@ -57,14 +57,8 @@ class DriveRosBridge(Node):
         # Drive core setup
         self.robot = Robot(initial_pose, self.send_command, lambda x: True)
         self.command_sampling_strategy = RandomSampling()
-
-        # TODO : The dataset_recorder needs to be integrated in core
-        self.command_sampling_started: bool = False
-        experience_dir = os.path.join("/home", "root", "datasets")
-        self.dataset_recorder = DatasetRecorder(experience_dir)
-
-        self.server = Server(self.start_drive_cb, self.start_geofence_cb, self.dataset_recorder.save_experience)
         self.drive = Drive(self.robot, self.command_sampling_strategy)
+        self.server = Server(self.start_drive_cb, self.start_geofence_cb, self.drive.save_dataset)
 
         # Interface setup
         self.interface_thread = Thread(target=self.server.run)
@@ -94,9 +88,6 @@ class DriveRosBridge(Node):
         msg.linear.x = command[0]
         msg.angular.z = command[1]
 
-        current_time_ns = self.get_clock().now().nanoseconds
-        self.dataset_recorder.save_command(command, current_time_ns)
-
         self.cmd_pub.publish(msg)
 
     def control_loop(self):
@@ -120,11 +111,9 @@ class DriveRosBridge(Node):
             [pose_msg.pose.position.x, pose_msg.pose.position.y, pose_msg.pose.position.z, roll, pitch, yaw]
         )
 
-        if self.command_sampling_started:
-            current_time_ns = self.get_clock().now().nanoseconds
-            self.dataset_recorder.save_pose(pose, current_time_ns)
+        current_time_ns = self.get_clock().now().nanoseconds
 
-        self.robot.pose_callback(pose)
+        self.robot.pose_callback(pose, current_time_ns)
 
     def deadman_callback(self, msg: Bool):
         self.robot.deadman_switch_callback(msg.data)
