@@ -2,7 +2,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 2rem;
+  margin: 0;
   padding: 0;
   height: 100vh;
   max-width: 100%;
@@ -10,24 +10,43 @@ body {
 
 .top-bar {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 99%;
+  padding-top: 1rem;
+}
+
+.selects {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: flex-start;
-  gap: 10px;
-  width: 100%;
-  padding: 10px;
-  position: fixed;
-  top: 0;
-  left: 0;
+  align-items: center;
+}
+
+.bottom-bar {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 99%;
 }
 
 .image-container {
-  margin-top: 2rem;
+  flex: 1;
   display: flex;
-  flex-grow: 1;
-  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  max-width: 100%;
+  max-width: 99%;
+}
+
+.save-dataset-form {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+}
+
+.save-dataset-form label {
+  margin-right: 1rem;
 }
 
 .image-container img {
@@ -36,6 +55,18 @@ body {
 }
 
 @media (max-width: 600px) {
+  .top-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
+
+  .selects {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
+
   .image-container {
     flex-direction: column;
   }
@@ -43,5 +74,4 @@ body {
 
 #mainButton {
   width: 100%;
-  max-width: 100%;
 }

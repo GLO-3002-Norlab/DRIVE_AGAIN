@@ -6,3 +6,4 @@
 src/*.egg-info
 build/*
 .coverage
+datasets

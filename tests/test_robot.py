@@ -38,7 +38,8 @@ def robot() -> Robot:
 
 def test_pose_callback_sets_the_pose(robot: Robot):
     new_pose = np.array([1, 1, 1])
-    robot.pose_callback(new_pose)
+    timestamp_ns = 0
+    robot.pose_callback(new_pose, timestamp_ns)
 
     assert (robot.pose == new_pose).all()
 
