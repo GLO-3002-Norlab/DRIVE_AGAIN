@@ -7,12 +7,16 @@ class Robot:
         self, initial_pose: Pose, send_command_fn: Callable[[Command], None], send_goal_fn: Callable[[Pose], bool]
     ) -> None:
         self.pose = initial_pose
+        self.deadman_switch_pressed = False
         self.send_command_fn = send_command_fn
         self.send_goal_fn = send_goal_fn
         self.goal_reached = False
 
     def pose_callback(self, pose: Pose) -> None:
         self.pose = pose
+
+    def deadman_switch_callback(self, pressed: bool) -> None:
+        self.deadman_switch_pressed = pressed
 
     def goal_reached_callback(self) -> None:
         self.goal_reached = True

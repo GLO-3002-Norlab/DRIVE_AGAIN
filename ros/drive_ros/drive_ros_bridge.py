@@ -1,14 +1,16 @@
-from threading import Thread
+import logging
 import os
+from threading import Thread
 
 import numpy as np
 import rclpy
 import tf_transformations
 from geometry_msgs.msg import PoseStamped, Twist
 from rclpy.node import Node
+from std_msgs.msg import Bool
 
 from DRIVE_AGAIN.data.dataset_recorder import DatasetRecorder
-from DRIVE_AGAIN.drive import Drive, DriveStateEnum
+from DRIVE_AGAIN.drive import Drive
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.sampling import RandomSampling
 from DRIVE_AGAIN.server import Server
@@ -16,16 +18,45 @@ from DRIVE_AGAIN.server import Server
 WHEEL_BASE = 0.5
 
 
+def redirect_logging_to_ros2():
+    ros2_logger = rclpy.logging.get_logger("DRIVE_AGAIN")  # type: ignore
+
+    class ROS2Handler(logging.Handler):
+        def emit(self, record):
+            log_entry = self.format(record)
+            if record.levelno == logging.DEBUG:
+                ros2_logger.debug(log_entry)
+            elif record.levelno == logging.INFO:
+                ros2_logger.info(log_entry)
+            elif record.levelno == logging.WARNING:
+                ros2_logger.warn(log_entry)
+            elif record.levelno == logging.ERROR:
+                ros2_logger.error(log_entry)
+            elif record.levelno == logging.CRITICAL:
+                ros2_logger.fatal(log_entry)
+
+    root_logger = logging.getLogger()
+    for handler in root_logger.handlers:
+        root_logger.removeHandler(handler)
+
+    ros2_handler = ROS2Handler()
+    formatter = logging.Formatter("%(levelname)s: %(message)s")
+    ros2_handler.setFormatter(formatter)
+    root_logger.addHandler(ros2_handler)
+    root_logger.setLevel(logging.INFO)
+
+
 class DriveRosBridge(Node):
     def __init__(self):
         super().__init__("drive_ros_bridge", parameter_overrides=[])
+
+        redirect_logging_to_ros2()
 
         initial_pose = np.array([0.0, 0.0, 0.0])
 
         # Drive core setup
         self.robot = Robot(initial_pose, self.send_command, lambda x: True)
         self.command_sampling_strategy = RandomSampling()
-        self.drive = Drive(self.robot, self.command_sampling_strategy, step_duration_s=3.0)
 
         # TODO : The dataset_recorder needs to be integrated in core
         self.command_sampling_started: bool = False
@@ -33,6 +64,7 @@ class DriveRosBridge(Node):
         self.dataset_recorder = DatasetRecorder(experience_dir)
 
         self.server = Server(self.start_drive_cb, self.start_geofence_cb, self.dataset_recorder.save_experience)
+        self.drive = Drive(self.robot, self.command_sampling_strategy)
 
         # Interface setup
         self.interface_thread = Thread(target=self.server.run)
@@ -41,16 +73,21 @@ class DriveRosBridge(Node):
         # ROS setup
         self.cmd_pub = self.create_publisher(Twist, "cmd_vel", 10)
         self.loc_sub = self.create_subscription(PoseStamped, "pose", self.loc_callback, 10)
+        self.deadman_sub = self.create_subscription(Bool, "deadman", self.deadman_callback, 10)
         self.timer = self.create_timer(0.1, self.control_loop)
 
         self.get_logger().info("Drive ROS bridge started")
 
     def start_drive_cb(self):
-        self.drive.change_state(DriveStateEnum.command_sampling)
+        current_time_ns = self.get_clock().now().nanoseconds
+        # For now doing both at the same time
+        self.drive.confirm_geofence(current_time_ns)
+        self.drive.start_drive(current_time_ns + 1)
         self.command_sampling_started = True
 
     def start_geofence_cb(self):
-        self.drive.change_state(DriveStateEnum.geofence_creation)
+        current_time_ns = self.get_clock().now().nanoseconds
+        self.drive.start_geofence(current_time_ns)
 
     def send_command(self, command):
         msg = Twist()
@@ -64,14 +101,9 @@ class DriveRosBridge(Node):
 
     def control_loop(self):
         current_time_ns = self.get_clock().now().nanoseconds
-        self.drive.start(current_time_ns)
         self.drive.run(current_time_ns)
 
-        # TODO: Do something cleaner with this geofence_points hack
-        if self.drive.geofence is None:
-            geofence_points = self.drive.get_geofence_points()
-        else:
-            geofence_points = np.array([np.array(point) for point in self.drive.geofence.polygon.exterior.coords])
+        geofence_points = self.drive.get_geofence_points()
 
         self.server.update_robot_viz(self.robot.pose, geofence_points, WHEEL_BASE)
         self.server.update_input_space(self.drive.get_commands())
@@ -93,6 +125,9 @@ class DriveRosBridge(Node):
             self.dataset_recorder.save_pose(pose, current_time_ns)
 
         self.robot.pose_callback(pose)
+
+    def deadman_callback(self, msg: Bool):
+        self.robot.deadman_switch_callback(msg.data)
 
 
 def main(args=None):
