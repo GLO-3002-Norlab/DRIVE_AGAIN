@@ -58,7 +58,7 @@ class DriveRosBridge(Node):
         self.robot = Robot(initial_pose, self.send_command, lambda x: True)
         self.command_sampling_strategy = RandomSampling()
         self.drive = Drive(self.robot, self.command_sampling_strategy)
-        self.server = Server(self.start_drive_cb, self.start_geofence_cb, self.drive.save_dataset)
+        self.server = Server(self.start_drive_cb, self.start_geofence_cb, self.drive.save_dataset, self.skip_command_cb)
 
         # Interface setup
         self.interface_thread = Thread(target=self.server.run)
@@ -81,7 +81,12 @@ class DriveRosBridge(Node):
 
     def start_geofence_cb(self):
         current_time_ns = self.get_clock().now().nanoseconds
+        self.update_timestamp()
         self.drive.start_geofence(current_time_ns)
+
+    def skip_command_cb(self):
+        current_time_ns = self.get_clock().now().nanoseconds
+        self.drive.skip_current_step(current_time_ns)
 
     def send_command(self, command):
         msg = Twist()
@@ -98,6 +103,11 @@ class DriveRosBridge(Node):
 
         self.server.update_robot_viz(self.robot.pose, geofence_points, WHEEL_BASE)
         self.server.update_input_space(self.drive.get_commands())
+
+        if self.drive.can_skip_command():
+            self.server.skippable_state_start()
+        else:
+            self.server.skippable_state_end()
 
     def loc_callback(self, pose_msg: PoseStamped):
         quaternion = [

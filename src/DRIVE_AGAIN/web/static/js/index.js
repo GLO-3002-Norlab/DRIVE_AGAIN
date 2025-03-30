@@ -1,6 +1,10 @@
 const socket = io();
 let stage = 0;
 
+function skipCommandButtonClick() {
+  socket.emit("skip_command");
+}
+
 function handleButtonClick() {
   const button = document.getElementById("mainButton");
 
@@ -34,6 +38,14 @@ socket.on("input_space_update", (data) => {
 socket.on("robot_vizualisation_update", (data) => {
   document.getElementById("robot_viz").src =
     `data:image/png;base64,${data.image_data}`;
+});
+
+socket.on("skippable_state_start", (data) => {
+  document.getElementById("skip-command-button").disabled = false;
+});
+
+socket.on("skippable_state_end", (data) => {
+  document.getElementById("skip-command-button").disabled = true;
 });
 
 
