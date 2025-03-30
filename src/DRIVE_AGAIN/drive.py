@@ -1,4 +1,5 @@
 import logging
+import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
@@ -6,6 +7,8 @@ from enum import Enum
 import numpy as np
 
 from DRIVE_AGAIN.common import Command
+from DRIVE_AGAIN.data import dataset_recorder
+from DRIVE_AGAIN.data.dataset_recorder import DatasetRecorder
 from DRIVE_AGAIN.geofencing import Geofence
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.sampling import CommandSamplingStrategy
@@ -63,6 +66,15 @@ class RunningState(DriveState):
         self.step_duration_s = 6.0
 
     def run(self, timestamp_ns: float):
+        if not self.drive.robot.deadman_switch_pressed:
+            logging.info("Deadman switch not pressed, pausing drive")
+            self.drive.pause_drive(timestamp_ns)
+            return
+
+        last_poses = self.drive.robot.get_poses()
+        self.drive.robot.empty_pose_buffer()
+        self.drive.dataset_recorder.save_poses(last_poses)
+
         current_step: Step = self.drive.current_step
 
         # TODO: https://github.com/GLO-3002-Norlab/DRIVE_AGAIN/issues/44
@@ -85,7 +97,10 @@ class RunningState(DriveState):
 
 class PausedState(DriveState):
     def run(self, timestamp_ns: float):
-        pass
+        if self.drive.robot.deadman_switch_pressed:
+            logging.info("Deadman switch pressed, resuming drive")
+            self.drive.resume_drive(timestamp_ns)
+            return
 
 
 class StoppedState(DriveState):
@@ -102,20 +117,25 @@ class Drive:
         self.geofence: None | Geofence = None
         self.current_step: None | Step = None
 
+        experience_dir = os.path.join("/home", "root", "datasets")
+        self.dataset_recorder = DatasetRecorder(experience_dir)
+
         self.commands = []
 
     def run(self, timestamp_ns: float):
-        if self.robot.deadman_switch_pressed:
-            self.current_state.run(timestamp_ns)
-        else:
-            logging.info(f"Deadman switch not pressed")
+        self.current_state.run(timestamp_ns)
 
     def sample_next_step(self, timestamp_ns: float):
         command = self.command_sampling_strategy.sample_command()
         self.current_step = Step(command, timestamp_ns)
         logging.info(f"Sampling next command {command} at timestamp {timestamp_ns}")
 
+        self.dataset_recorder.save_command(command, int(timestamp_ns))
+
         self.current_state = RunningState(self, timestamp_ns, self.current_step)
+
+    def save_dataset(self, dataset_name: str):
+        self.dataset_recorder.save_experience(dataset_name)
 
     def skip_current_step(self, timestamp_ns: float):
         self.sample_next_step(timestamp_ns)
