@@ -127,6 +127,7 @@ class Drive:
 
     def sample_next_step(self, timestamp_ns: float):
         command = self.command_sampling_strategy.sample_command()
+        self.commands.append(command)
         self.current_step = Step(command, timestamp_ns)
         logging.info(f"Sampling next command {command} at timestamp {timestamp_ns}")
 
