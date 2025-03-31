@@ -46,7 +46,7 @@ class Server:
     def skippable_state_end(self):
         self.socketio.emit("skippable_state_end")
 
-    def create_server(self, start_drive_cb, start_geofencing_cb, skip_command_cb, save_dataset_cb):
+    def create_server(self, start_drive_cb, start_geofencing_cb, save_dataset_cb, skip_command_cb):
         app = Flask(__name__, static_url_path="/static", static_folder="web/static", template_folder="web/templates")
         socketio = SocketIO(app)
 

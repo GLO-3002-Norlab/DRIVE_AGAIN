@@ -138,6 +138,7 @@ class Drive:
         self.dataset_recorder.save_experience(dataset_name)
 
     def skip_current_step(self, timestamp_ns: float):
+        logging.info(f"Skipping command...")
         self.sample_next_step(timestamp_ns)
 
     def get_commands(self) -> np.ndarray:

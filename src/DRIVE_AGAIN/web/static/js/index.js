@@ -19,10 +19,6 @@ function handleButtonClick() {
   stage++;
 }
 
-function saveDataset() {
-  socket.emit("save_dataset");
-}
-
 function saveDataset(event) {
   event.preventDefault();
   const datasetName = document.getElementById("dataset-name-input").value;

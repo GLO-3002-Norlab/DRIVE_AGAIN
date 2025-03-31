@@ -52,7 +52,7 @@ class DriveRosBridge(Node):
 
         redirect_logging_to_ros2()
 
-        initial_pose = np.array([0.0, 0.0, 0.0])
+        initial_pose = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
         # Drive core setup
         self.robot = Robot(initial_pose, self.send_command, lambda x: True)
