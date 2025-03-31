@@ -81,7 +81,6 @@ class DriveRosBridge(Node):
 
     def start_geofence_cb(self):
         current_time_ns = self.get_clock().now().nanoseconds
-        self.update_timestamp()
         self.drive.start_geofence(current_time_ns)
 
     def skip_command_cb(self):
