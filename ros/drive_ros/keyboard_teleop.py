@@ -34,9 +34,9 @@
 import sys
 import threading
 
-from std_msgs.msg import Bool
 import geometry_msgs.msg
 import rclpy
+from std_msgs.msg import Bool
 
 if sys.platform == "win32":
     import msvcrt
@@ -52,6 +52,7 @@ as Twist/TwistStamped messages. It works best with a US keyboard layout.
 Moving around:
         i
    j        l
+        k
 
 
 Deadman switch for autonomous mode: x
@@ -63,6 +64,7 @@ moveBindings = {
     "i": (1, 0, 0, 0),
     "j": (0, 0, 0, 1),
     "l": (0, 0, 0, -1),
+    "k": (-1, 0, 0, 0),
 }
 
 

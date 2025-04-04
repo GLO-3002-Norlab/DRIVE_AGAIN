@@ -6,7 +6,7 @@ from enum import Enum
 
 import numpy as np
 
-from DRIVE_AGAIN.common import Command
+from DRIVE_AGAIN.common import Command, Pose
 from DRIVE_AGAIN.data import dataset_recorder
 from DRIVE_AGAIN.data.dataset_recorder import DatasetRecorder
 from DRIVE_AGAIN.geofencing import Geofence
@@ -60,7 +60,7 @@ class ReadyState(DriveState):
 
 
 class RunningState(DriveState):
-    def __init__(self, drive, timestamp_ns: float, step: Step):
+    def __init__(self, drive, timestamp_ns: float):
         super().__init__(drive)
 
         self.step_duration_s = 6.0
@@ -71,22 +71,15 @@ class RunningState(DriveState):
             self.drive.pause_drive(timestamp_ns)
             return
 
+        if not self.drive.is_robot_inside_geofence():
+            self.drive.go_back_inside_geofence(timestamp_ns)
+            return
+
         last_poses = self.drive.robot.get_poses()
         self.drive.robot.empty_pose_buffer()
         self.drive.dataset_recorder.save_poses(last_poses)
 
         current_step: Step = self.drive.current_step
-
-        # TODO: https://github.com/GLO-3002-Norlab/DRIVE_AGAIN/issues/44
-        # If outside geofence, return to center
-        # current_point = self.drive.robot.pose[:2]
-        # geofence = self.drive.geofence
-        # next_command = self.drive.next_command
-        # if not geofence.is_point_inside(current_point):
-        #     goal_pose = np.array([self.geofence.origin[0], self.geofence.origin[1], 0])
-        #     self.robot.send_goal(goal_pose)
-        #     self.pause()
-        #     return
 
         if timestamp_ns - current_step.start_timestamp_ns > self.step_duration_s * 1e9:
             self.drive.sample_next_step(timestamp_ns)
@@ -106,6 +99,28 @@ class PausedState(DriveState):
 class StoppedState(DriveState):
     def run(self, timestamp_ns: float):
         pass
+
+
+class BackToCenterState(DriveState):
+    def __init__(self, drive, timestamp_ns: float):
+        super().__init__(drive)
+
+        self.waiting_for_goal = False
+
+    def run(self, timestamp_ns: float):
+        if not self.waiting_for_goal:
+            geofence = self.drive.geofence
+            goal_pose: Pose = np.array([geofence.origin[0], geofence.origin[1], 0, 0, 0, 0])
+
+            logging.info(f"Sending goal {goal_pose} to robot")
+            self.waiting_for_goal = True
+            self.drive.robot.send_goal(goal_pose)
+            return
+
+        if self.drive.robot.goal_reached:
+            logging.info("Goal reached, resuming drive")
+            self.drive.resume_drive(timestamp_ns)
+            return
 
 
 class Drive:
@@ -133,7 +148,14 @@ class Drive:
 
         self.dataset_recorder.save_command(command, int(timestamp_ns))
 
-        self.current_state = RunningState(self, timestamp_ns, self.current_step)
+        self.current_state = RunningState(self, timestamp_ns)
+
+    def is_robot_inside_geofence(self) -> bool:
+        if self.geofence is None:
+            return True
+
+        current_point = self.robot.pose[:2]
+        return self.geofence.is_point_inside(current_point)
 
     def save_dataset(self, dataset_name: str):
         self.dataset_recorder.save_experience(dataset_name)
@@ -143,10 +165,7 @@ class Drive:
         self.sample_next_step(timestamp_ns)
 
     def get_commands(self) -> np.ndarray:
-        if self.current_state.__class__ == RunningState:
-            return np.array(self.commands)
-
-        return np.array([])
+        return np.array(self.commands)
 
     def get_geofence_points(self) -> np.ndarray:
         if self.current_state.__class__ == GeofenceCreationState:
@@ -199,10 +218,20 @@ class Drive:
         raise IllegalStateTransition(self.current_state.__class__.__name__, "pause_drive")
 
     def resume_drive(self, timestamp_ns: float):
-        if self.current_state.__class__ == PausedState and self.current_step is not None:
+        if (
+            self.current_state.__class__ == PausedState or self.current_state.__class__ == BackToCenterState
+        ) and self.current_step is not None:
             logging.info(f"Resuming drive at timestamp {timestamp_ns}")
             self.current_step.start_timestamp_ns = timestamp_ns
-            self.current_state = RunningState(self, timestamp_ns, self.current_step)
+            self.current_state = RunningState(self, timestamp_ns)
+            return
+
+        raise IllegalStateTransition(self.current_state.__class__.__name__, "resume_drive")
+
+    def go_back_inside_geofence(self, timestamp_ns: float):
+        if self.current_state.__class__ == RunningState and not self.is_robot_inside_geofence():
+            logging.info(f"Going back to center at timestamp {timestamp_ns}")
+            self.current_state = BackToCenterState(self, timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "resume_drive")
