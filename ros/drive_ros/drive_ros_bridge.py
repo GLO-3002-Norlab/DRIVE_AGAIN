@@ -9,6 +9,7 @@ from geometry_msgs.msg import PoseStamped, Twist
 from rclpy.node import Node
 from std_msgs.msg import Bool
 
+from DRIVE_AGAIN.common import Pose
 from DRIVE_AGAIN.data.dataset_recorder import DatasetRecorder
 from DRIVE_AGAIN.drive import Drive
 from DRIVE_AGAIN.robot import Robot
@@ -55,7 +56,7 @@ class DriveRosBridge(Node):
         initial_pose = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
         # Drive core setup
-        self.robot = Robot(initial_pose, self.send_command, lambda x: True)
+        self.robot = Robot(initial_pose, self.send_command, self.send_goal)
         self.command_sampling_strategy = RandomSampling()
         self.drive = Drive(self.robot, self.command_sampling_strategy)
         self.server = Server(self.start_drive_cb, self.start_geofence_cb, self.drive.save_dataset, self.skip_command_cb)
@@ -66,7 +67,9 @@ class DriveRosBridge(Node):
 
         # ROS setup
         self.cmd_pub = self.create_publisher(Twist, "cmd_vel", 10)
+        self.goal_pub = self.create_publisher(PoseStamped, "goal", 10)
         self.loc_sub = self.create_subscription(PoseStamped, "pose", self.loc_callback, 10)
+        self.goal_reached_sub = self.create_subscription(PoseStamped, "goal_reached", self.goal_reached_callback, 10)
         self.deadman_sub = self.create_subscription(Bool, "deadman", self.deadman_callback, 10)
         self.timer = self.create_timer(0.1, self.control_loop)
 
@@ -93,6 +96,24 @@ class DriveRosBridge(Node):
         msg.angular.z = command[1]
 
         self.cmd_pub.publish(msg)
+
+    def send_goal(self, goal_pose: Pose):
+        quat = tf_transformations.quaternion_from_euler(goal_pose[3], goal_pose[4], goal_pose[5])
+
+        pose_msg = PoseStamped()
+        pose_msg.header.stamp = self.get_clock().now().to_msg()
+        pose_msg.pose.position.x = goal_pose[0]
+        pose_msg.pose.position.y = goal_pose[1]
+        pose_msg.pose.position.z = goal_pose[2]
+        pose_msg.pose.orientation.x = quat[0]
+        pose_msg.pose.orientation.y = quat[1]
+        pose_msg.pose.orientation.z = quat[2]
+        pose_msg.pose.orientation.w = quat[3]
+
+        self.goal_pub.publish(pose_msg)
+
+    def goal_reached_callback(self, pose_msg: PoseStamped):
+        self.robot.goal_reached_callback()
 
     def control_loop(self):
         current_time_ns = self.get_clock().now().nanoseconds

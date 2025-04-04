@@ -1,10 +1,11 @@
 from typing import Callable
-from DRIVE_AGAIN.common import Pose, Command
+
+from DRIVE_AGAIN.common import Command, Pose
 
 
 class Robot:
     def __init__(
-        self, initial_pose: Pose, send_command_fn: Callable[[Command], None], send_goal_fn: Callable[[Pose], bool]
+        self, initial_pose: Pose, send_command_fn: Callable[[Command], None], send_goal_fn: Callable[[Pose], None]
     ) -> None:
         self.pose = initial_pose
         self.deadman_switch_pressed = False
@@ -33,4 +34,5 @@ class Robot:
         self.send_command_fn(command)
 
     def send_goal(self, goal_pose: Pose) -> None:
-        self.goal_reached = self.send_goal_fn(goal_pose)
+        self.goal_reached = False
+        self.send_goal_fn(goal_pose)
