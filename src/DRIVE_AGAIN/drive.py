@@ -63,9 +63,12 @@ class RunningState(DriveState):
     def __init__(self, drive, timestamp_ns: float):
         super().__init__(drive)
 
-        self.step_duration_s = 6.0
-
     def run(self, timestamp_ns: float):
+        if len(self.drive.commands) >= self.drive.target_nb_steps:
+            logging.info("Target number of steps reached, stopping drive")
+            self.drive.stop_drive(timestamp_ns)
+            return
+
         if not self.drive.robot.deadman_switch_pressed:
             logging.info("Deadman switch not pressed, pausing drive")
             self.drive.pause_drive(timestamp_ns)
@@ -81,7 +84,7 @@ class RunningState(DriveState):
 
         current_step: Step = self.drive.current_step
 
-        if timestamp_ns - current_step.start_timestamp_ns > self.step_duration_s * 1e9:
+        if timestamp_ns - current_step.start_timestamp_ns > self.drive.step_duration_s * 1e9:
             self.drive.sample_next_step(timestamp_ns)
             return
 
@@ -124,10 +127,18 @@ class BackToCenterState(DriveState):
 
 
 class Drive:
-    def __init__(self, robot: Robot, command_sampling_strategy: CommandSamplingStrategy):
+    def __init__(
+        self,
+        robot: Robot,
+        command_sampling_strategy: CommandSamplingStrategy,
+        target_nb_steps: int,
+        step_duration_s: float,
+    ):
         self.robot = robot
         self.command_sampling_strategy = command_sampling_strategy
+        self.target_nb_steps = target_nb_steps
         self.current_state = WaitingState(self)
+        self.step_duration_s = step_duration_s
 
         self.geofence: None | Geofence = None
         self.current_step: None | Step = None
@@ -138,6 +149,7 @@ class Drive:
         self.commands = []
 
     def run(self, timestamp_ns: float):
+
         self.current_state.run(timestamp_ns)
 
     def sample_next_step(self, timestamp_ns: float):

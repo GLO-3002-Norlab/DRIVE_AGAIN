@@ -13,7 +13,7 @@ from DRIVE_AGAIN.common import Pose
 from DRIVE_AGAIN.data.dataset_recorder import DatasetRecorder
 from DRIVE_AGAIN.drive import Drive
 from DRIVE_AGAIN.robot import Robot
-from DRIVE_AGAIN.sampling import RandomSampling
+from DRIVE_AGAIN.sampling import CommandSamplingFactory, RandomSampling
 from DRIVE_AGAIN.server import Server
 
 WHEEL_BASE = 0.5
@@ -55,10 +55,33 @@ class DriveRosBridge(Node):
 
         initial_pose = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
+        # Get ROS parameters
+        self.declare_parameter("nb_steps", 100)
+        self.declare_parameter("step_duration_s", 6.0)
+        self.declare_parameter("command_sampling_strategy", "random")
+        self.declare_parameter("min_linear_speed", 0.0)
+        self.declare_parameter("max_linear_speed", 0.5)
+        self.declare_parameter("max_angular_speed", -1.0)
+        self.declare_parameter("min_angular_speed", 1.0)
+
+        self.nb_steps = self.get_parameter("nb_steps").value
+        self.step_duration_s = self.get_parameter("step_duration_s").value
+        self.command_sampling_strategy_str = self.get_parameter("command_sampling_strategy").value
+        self.min_linear_speed = self.get_parameter("min_linear_speed").value
+        self.max_linear_speed = self.get_parameter("max_linear_speed").value
+        self.min_angular_speed = self.get_parameter("min_angular_speed").value
+        self.max_angular_speed = self.get_parameter("max_angular_speed").value
+
         # Drive core setup
         self.robot = Robot(initial_pose, self.send_command, self.send_goal)
-        self.command_sampling_strategy = RandomSampling()
-        self.drive = Drive(self.robot, self.command_sampling_strategy)
+        self.command_sampling_strategy = CommandSamplingFactory.create_sampling_strategy(
+            self.command_sampling_strategy_str,
+            self.min_linear_speed,
+            self.max_linear_speed,
+            self.min_angular_speed,
+            self.max_angular_speed,
+        )
+        self.drive = Drive(self.robot, self.command_sampling_strategy, self.nb_steps, self.step_duration_s)
         self.server = Server(self.start_drive_cb, self.start_geofence_cb, self.drive.save_dataset, self.skip_command_cb)
 
         # Interface setup
