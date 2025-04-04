@@ -12,9 +12,9 @@ from DRIVE_AGAIN.plot import draw_input_space, draw_robot_visualization_figure
 
 
 class Server:
-    def __init__(self, start_drive_cb, start_geofencing_cb, skip_command_cb, stop_drive_cb):
+    def __init__(self, start_drive_cb, start_geofencing_cb, save_dataset_cb, skip_command_cb, stop_drive_cb):
         self.app, self.socketio = self.create_server(
-            start_drive_cb, start_geofencing_cb, skip_command_cb, stop_drive_cb
+            start_drive_cb, start_geofencing_cb, save_dataset_cb, skip_command_cb, stop_drive_cb
         )
 
         self.fig_viz, self.ax_viz = plt.subplots()
@@ -40,7 +40,13 @@ class Server:
 
         self.socketio.emit("input_space_update", {"image_data": input_space_b64})
 
-    def create_server(self, start_drive_cb, start_geofencing_cb, skip_command_cb, stop_drive_cb):
+    def skippable_state_start(self):
+        self.socketio.emit("skippable_state_start")
+
+    def skippable_state_end(self):
+        self.socketio.emit("skippable_state_end")
+
+    def create_server(self, start_drive_cb, start_geofencing_cb, save_dataset_cb, skip_command_cb, stop_drive_cb):
         app = Flask(__name__, static_url_path="/static", static_folder="web/static", template_folder="web/templates")
         socketio = SocketIO(app)
 
@@ -55,6 +61,11 @@ class Server:
         @socketio.on("start_geofencing")
         def start_geofencing():
             start_geofencing_cb()
+
+        @socketio.on("save_dataset")
+        def save_dataset(data):
+            dataset_name = data.get("name")
+            save_dataset_cb(dataset_name)
 
         @socketio.on("skip_command")
         def skip_command():

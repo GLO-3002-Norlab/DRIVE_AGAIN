@@ -34,16 +34,29 @@ function handleButtonClick() {
   stage++;
 }
 
+function saveDataset(event) {
+  event.preventDefault();
+  const datasetName = document.getElementById("dataset-name-input").value;
+  socket.emit("save_dataset", { name: datasetName });
+  console.log("Dataset saved with name:", datasetName);
+}
+
 socket.on("input_space_update", (data) => {
-  document.getElementById(
-    "input_space"
-  ).src = `data:image/png;base64,${data.image_data}`;
+  document.getElementById("input_space").src =
+    `data:image/png;base64,${data.image_data}`;
 });
 
 socket.on("robot_vizualisation_update", (data) => {
-  document.getElementById(
-    "robot_viz"
-  ).src = `data:image/png;base64,${data.image_data}`;
+  document.getElementById("robot_viz").src =
+    `data:image/png;base64,${data.image_data}`;
+});
+
+socket.on("skippable_state_start", (data) => {
+  document.getElementById("skip-command-button").disabled = false;
+});
+
+socket.on("skippable_state_end", (data) => {
+  document.getElementById("skip-command-button").disabled = true;
 });
 
 

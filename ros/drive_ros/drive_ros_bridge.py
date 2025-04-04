@@ -1,13 +1,15 @@
 import logging
+import os
 from threading import Thread
 
 import numpy as np
 import rclpy
 import tf_transformations
-from geometry_msgs.msg import Pose, Twist
+from geometry_msgs.msg import PoseStamped, Twist
 from rclpy.node import Node
 from std_msgs.msg import Bool
 
+from DRIVE_AGAIN.data.dataset_recorder import DatasetRecorder
 from DRIVE_AGAIN.drive import Drive
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.sampling import RandomSampling
@@ -50,14 +52,19 @@ class DriveRosBridge(Node):
 
         redirect_logging_to_ros2()
 
-        initial_pose = np.array([0.0, 0.0, 0.0])
+        initial_pose = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
         # Drive core setup
         self.robot = Robot(initial_pose, self.send_command, lambda x: True)
-        self.robot.deadman_switch_callback(True)
         self.command_sampling_strategy = RandomSampling()
         self.drive = Drive(self.robot, self.command_sampling_strategy)
-        self.server = Server(self.start_drive_cb, self.start_geofence_cb, self.skip_command_cb, self.stop_drive_cb)
+        self.server = Server(
+            self.start_drive_cb,
+            self.start_geofence_cb,
+            self.drive.save_dataset,
+            self.skip_command_cb,
+            self.stop_drive_cb,
+        )
 
         # Interface setup
         self.interface_thread = Thread(target=self.server.run)
@@ -65,7 +72,8 @@ class DriveRosBridge(Node):
 
         # ROS setup
         self.cmd_pub = self.create_publisher(Twist, "cmd_vel", 10)
-        self.loc_sub = self.create_subscription(Pose, "pose", self.loc_callback, 10)
+        self.loc_sub = self.create_subscription(PoseStamped, "pose", self.loc_callback, 10)
+        self.deadman_sub = self.create_subscription(Bool, "deadman", self.deadman_callback, 10)
         self.timer = self.create_timer(0.1, self.control_loop)
 
         self.get_logger().info("Drive ROS bridge started")
@@ -75,6 +83,7 @@ class DriveRosBridge(Node):
         # For now doing both at the same time
         self.drive.confirm_geofence(current_time_ns)
         self.drive.start_drive(current_time_ns + 1)
+        self.command_sampling_started = True
 
     def start_geofence_cb(self):
         current_time_ns = self.get_clock().now().nanoseconds
@@ -105,12 +114,29 @@ class DriveRosBridge(Node):
         self.server.update_robot_viz(self.robot.pose, geofence_points, WHEEL_BASE)
         self.server.update_input_space(self.drive.get_commands())
 
-    def loc_callback(self, pose_msg: Pose):
-        quaternion = [pose_msg.orientation.x, pose_msg.orientation.y, pose_msg.orientation.z, pose_msg.orientation.w]
-        _, _, yaw = tf_transformations.euler_from_quaternion(quaternion)
-        pose = np.array([pose_msg.position.x, pose_msg.position.y, yaw])
+        if self.drive.can_skip_command():
+            self.server.skippable_state_start()
+        else:
+            self.server.skippable_state_end()
 
-        self.robot.pose_callback(pose)
+    def loc_callback(self, pose_msg: PoseStamped):
+        quaternion = [
+            pose_msg.pose.orientation.x,
+            pose_msg.pose.orientation.y,
+            pose_msg.pose.orientation.z,
+            pose_msg.pose.orientation.w,
+        ]
+        roll, pitch, yaw = tf_transformations.euler_from_quaternion(quaternion)
+        pose = np.array(
+            [pose_msg.pose.position.x, pose_msg.pose.position.y, pose_msg.pose.position.z, roll, pitch, yaw]
+        )
+
+        current_time_ns = self.get_clock().now().nanoseconds
+
+        self.robot.pose_callback(pose, current_time_ns)
+
+    def deadman_callback(self, msg: Bool):
+        self.robot.deadman_switch_callback(msg.data)
 
 
 def main(args=None):
