@@ -1,8 +1,10 @@
+import logging
 import os
+
 from DRIVE_AGAIN.common import Command, Pose
-from DRIVE_AGAIN.saveable_types import GeofencePoint, Saveable, StateTransition
+from DRIVE_AGAIN.csv_reader import CsvReader
 from DRIVE_AGAIN.csv_writer import CsvWriter
-from DRIVE_AGAIN.saveable_types import DriveStep, Position6DOF
+from DRIVE_AGAIN.data_types import DriveStep, GeofencePoint, Position6DOF, Serializable, StateTransition
 
 
 class DatasetRecorder:
@@ -10,7 +12,8 @@ class DatasetRecorder:
         self.datasets_folder = datasets_folder
         self.step_id = 0
 
-        self.writers: dict[type[Saveable], CsvWriter] = {}
+        self.writers: dict[type[Serializable], CsvWriter] = {}
+        self.readers: dict[type[Serializable], CsvReader] = {}
 
         # Built-in recorders
         self._register(DriveStep)
@@ -18,15 +21,16 @@ class DatasetRecorder:
         self._register(GeofencePoint)
         self._register(StateTransition)
 
-    def _register(self, saveable_type: type[Saveable]):
+    def _register(self, saveable_type: type[Serializable]):
         self.writers[saveable_type] = CsvWriter(saveable_type)
+        self.readers[saveable_type] = CsvReader(saveable_type)
 
-    def register_custom_saveable(self, saveable_type: type[Saveable]):
+    def register_custom_saveable(self, saveable_type: type[Serializable]):
         if saveable_type in self.writers:
             raise ValueError(f"{saveable_type.__name__} is already registered.")
         self._register(saveable_type)
 
-    def save_custom_row(self, row: Saveable):
+    def save_custom_row(self, row: Serializable):
         saveable_type = type(row)
         if saveable_type not in self.writers:
             raise ValueError(f"{saveable_type.__name__} has not been registered.")
@@ -60,3 +64,13 @@ class DatasetRecorder:
 
         for writer in self.writers.values():
             writer.save_data_to_file(save_folder_path)
+
+    def get_datasets(self) -> list[str]:
+        return os.listdir(self.datasets_folder)
+
+    def load_geofence(self, dataset_name: str):
+        logging.info("load geofence: " + dataset_name)
+
+        folder_path = os.path.join(self.datasets_folder, dataset_name)
+
+        self.readers[GeofencePoint].load_data_from_file(folder_path)

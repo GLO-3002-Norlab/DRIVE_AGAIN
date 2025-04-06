@@ -1,6 +1,6 @@
 import logging
-import re
 import os
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
@@ -181,6 +181,12 @@ class Drive:
 
     def save_dataset(self, dataset_name: str):
         self.dataset_recorder.save_experience(dataset_name)
+
+    def get_datasets(self) -> list[str]:
+        return self.dataset_recorder.get_datasets()
+
+    def load_geofence(self, dataset_name: str):
+        self.dataset_recorder.load_geofence(dataset_name)
 
     def skip_current_step(self, timestamp_ns: float):
         logging.info("Skipping command...")

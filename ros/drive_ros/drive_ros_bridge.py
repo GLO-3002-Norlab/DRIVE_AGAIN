@@ -80,7 +80,14 @@ class DriveRosBridge(Node):
             self.max_angular_speed,
         )
         self.drive = Drive(self.robot, self.command_sampling_strategy, self.nb_steps, self.step_duration_s)
-        self.server = Server(self.start_drive_cb, self.start_geofence_cb, self.drive.save_dataset, self.skip_command_cb)
+        self.server = Server(
+            self.start_drive_cb,
+            self.start_geofence_cb,
+            self.drive.save_dataset,
+            self.drive.load_geofence,
+            self.drive.get_datasets,
+            self.skip_command_cb,
+        )
 
         # Interface setup
         self.interface_thread = Thread(target=self.server.run)
