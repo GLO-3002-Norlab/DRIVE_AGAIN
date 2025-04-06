@@ -1,15 +1,25 @@
 from dataclasses import dataclass
+from abc import ABC, abstractmethod
 
 
 @dataclass
-class Saveable:
+class Saveable(ABC):
     @classmethod
     def headers(cls) -> list[str]:
         return list(cls.__annotations__.keys())
 
+    @staticmethod
+    @abstractmethod
+    def get_filename() -> str:
+        pass
+
 
 @dataclass
 class Position6DOF(Saveable):
+    @staticmethod
+    def get_filename() -> str:
+        return "positions"
+
     timestamp: int  # ns
     step_id: int
     x: float  # m
@@ -22,6 +32,10 @@ class Position6DOF(Saveable):
 
 @dataclass
 class Speed6DOF(Saveable):
+    @staticmethod
+    def get_filename() -> str:
+        return "speeds"
+
     timestamp: int  # ns
     step_id: int
     speed_x: float  # m/s
@@ -34,6 +48,10 @@ class Speed6DOF(Saveable):
 
 @dataclass
 class Acceleration6DOF(Saveable):
+    @staticmethod
+    def get_filename() -> str:
+        return "accelerations"
+
     timestamp: int  # ns
     step_id: int
     a_x: float  # m/(s**2)
@@ -46,6 +64,10 @@ class Acceleration6DOF(Saveable):
 
 @dataclass
 class DriveStep(Saveable):
+    @staticmethod
+    def get_filename() -> str:
+        return "steps"
+
     step_start_timestamp: int  # ns
     step_id: int
     commanded_linear_velocity: float  # m/s

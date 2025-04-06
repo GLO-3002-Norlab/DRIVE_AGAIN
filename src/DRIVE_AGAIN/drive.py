@@ -2,13 +2,11 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from enum import Enum
 
 import numpy as np
 
 from DRIVE_AGAIN.common import Command, Pose
-from DRIVE_AGAIN.data import dataset_recorder
-from DRIVE_AGAIN.data.dataset_recorder import DatasetRecorder
+from DRIVE_AGAIN.dataset_recorder import DatasetRecorder
 from DRIVE_AGAIN.geofencing import Geofence
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.sampling import CommandSamplingStrategy
