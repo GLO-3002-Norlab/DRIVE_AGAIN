@@ -63,7 +63,7 @@ class DriveRosBridge(Node):
         self.declare_parameter("min_angular_speed", 1.0)
 
         self.nb_steps: int = self.get_parameter("nb_steps").get_parameter_value().integer_value
-        self.step_duration_s: int = self.get_parameter("step_duration_s").get_parameter_value().integer_value
+        self.step_duration_s: float = self.get_parameter("step_duration_s").get_parameter_value().double_value
         self.command_sampling_strategy_str = self.get_parameter("command_sampling_strategy").value
         self.min_linear_speed: float = self.get_parameter("min_linear_speed").get_parameter_value().double_value
         self.max_linear_speed: float = self.get_parameter("max_linear_speed").get_parameter_value().double_value
