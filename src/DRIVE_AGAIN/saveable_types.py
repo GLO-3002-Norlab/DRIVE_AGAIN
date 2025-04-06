@@ -72,3 +72,25 @@ class DriveStep(Saveable):
     step_id: int
     commanded_linear_velocity: float  # m/s
     commanded_angular_velocity: float  # rad/s
+
+
+@dataclass
+class GeofencePoint(Saveable):
+    @staticmethod
+    def get_filename() -> str:
+        return "geofence"
+
+    x: float  # m
+    y: float  # m
+
+
+@dataclass
+class StateTransition(Saveable):
+    @staticmethod
+    def get_filename() -> str:
+        return "state_transitions"
+
+    timestamp: int  # ns
+    step_id: int
+    from_state: str
+    to_state: str

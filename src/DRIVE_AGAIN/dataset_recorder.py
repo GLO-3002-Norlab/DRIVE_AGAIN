@@ -1,7 +1,6 @@
 import os
-
 from DRIVE_AGAIN.common import Command, Pose
-from DRIVE_AGAIN.saveable_types import Saveable
+from DRIVE_AGAIN.saveable_types import GeofencePoint, Saveable, StateTransition
 from DRIVE_AGAIN.csv_writer import CsvWriter
 from DRIVE_AGAIN.saveable_types import DriveStep, Position6DOF
 
@@ -16,6 +15,8 @@ class DatasetRecorder:
         # Built-in recorders
         self._register(DriveStep)
         self._register(Position6DOF)
+        self._register(GeofencePoint)
+        self._register(StateTransition)
 
     def _register(self, saveable_type: type[Saveable]):
         self.writers[saveable_type] = CsvWriter(saveable_type)
@@ -39,6 +40,15 @@ class DatasetRecorder:
     def save_pose(self, pose: Pose, timestamp_ns: int):
         pose_6DOF = Position6DOF(timestamp_ns, self.step_id, *pose)
         self.writers[Position6DOF].save_line(pose_6DOF)
+
+    def save_geofence(self, geofence_points: list[tuple[float, float]]):
+        for x, y in geofence_points:
+            point = GeofencePoint(x, y)
+            self.writers[GeofencePoint].save_line(point)
+
+    def save_state_transition(self, from_state: str, to_state: str, timestamp_ns: int):
+        state_transition = StateTransition(timestamp_ns, self.step_id, from_state, to_state)
+        self.writers[StateTransition].save_line(state_transition)
 
     def save_poses(self, poses_array):
         for pose, timestamp_ns in poses_array:
