@@ -1,4 +1,3 @@
-import logging
 import os
 
 from DRIVE_AGAIN.common import Command, Pose
@@ -68,9 +67,9 @@ class DatasetRecorder:
     def get_datasets(self) -> list[str]:
         return os.listdir(self.datasets_folder)
 
-    def load_geofence(self, dataset_name: str):
-        logging.info("load geofence: " + dataset_name)
-
+    def load_geofence(self, dataset_name: str) -> list[GeofencePoint]:
         folder_path = os.path.join(self.datasets_folder, dataset_name)
 
         self.readers[GeofencePoint].load_data_from_file(folder_path)
+
+        return self.readers[GeofencePoint].data

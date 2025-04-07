@@ -186,7 +186,11 @@ class Drive:
         return self.dataset_recorder.get_datasets()
 
     def load_geofence(self, dataset_name: str):
-        self.dataset_recorder.load_geofence(dataset_name)
+        geofence_points = self.dataset_recorder.load_geofence(dataset_name)
+        if geofence_points:
+            geofence_points_tuple: list[tuple[float, float]] = [(point.x, point.y) for point in geofence_points]
+            self.geofence = Geofence(geofence_points_tuple)
+            self.confirm_geofence(0)
 
     def skip_current_step(self, timestamp_ns: float):
         logging.info("Skipping command...")
@@ -222,7 +226,7 @@ class Drive:
         raise IllegalStateTransition(self.current_state.__class__.__name__, "restart_geofence")
 
     def confirm_geofence(self, timestamp_ns: float):
-        if self.current_state.__class__ == GeofenceCreationState:
+        if self.current_state.__class__ == GeofenceCreationState or self.current_state.__class__ == WaitingState:
             logging.info(f"Confirmed geofence at timestamp {timestamp_ns}")
             self.geofence = Geofence(self.current_state.geofence_points)  # type: ignore
             self.dataset_recorder.save_geofence(self.current_state.geofence_points)  # type: ignore

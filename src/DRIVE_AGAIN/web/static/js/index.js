@@ -56,16 +56,14 @@ socket.on("skippable_state_end", (data) => {
 });
 
 socket.on("datasets", (data) => {
+  let select = document.getElementById("dataset-load-select");
+  let v = select.value;
   s = "";
-  console.log(data);
   data.forEach(d => {
-    console.log(d);
-    console.log("<option value=\"" + d + "\">" + d + "</option>");
     s += "<option value=\"" + d + "\">" + d + "</option>";
   });
-  var select = document.getElementById("dataset-load-select");
   select.innerHTML = s;
-  select.value = data[0];
+  select.value = v;
 });
 
 
