@@ -84,7 +84,7 @@ class DriveRosBridge(Node):
             self.start_drive_cb,
             self.start_geofence_cb,
             self.drive.save_dataset,
-            self.drive.load_geofence,
+            self.load_geofence_cb,
             self.drive.get_datasets,
             self.skip_command_cb,
         )
@@ -117,6 +117,10 @@ class DriveRosBridge(Node):
     def skip_command_cb(self):
         current_time_ns = self.get_clock().now().nanoseconds
         self.drive.skip_current_step(current_time_ns)
+
+    def load_geofence_cb(self, dataset_name: str):
+        current_time_ns = self.get_clock().now().nanoseconds
+        self.drive.load_geofence(dataset_name, current_time_ns)
 
     def send_command(self, command):
         msg = Twist()

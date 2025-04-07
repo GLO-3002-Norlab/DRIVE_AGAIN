@@ -1,7 +1,6 @@
 import os
 
 from DRIVE_AGAIN.common import Command, Pose
-from DRIVE_AGAIN.csv_reader import CsvReader
 from DRIVE_AGAIN.csv_writer import CsvWriter
 from DRIVE_AGAIN.data_types import DriveStep, GeofencePoint, Position6DOF, Serializable, StateTransition
 
@@ -12,7 +11,6 @@ class DatasetRecorder:
         self.step_id = 0
 
         self.writers: dict[type[Serializable], CsvWriter] = {}
-        self.readers: dict[type[Serializable], CsvReader] = {}
 
         # Built-in recorders
         self._register(DriveStep)
@@ -22,7 +20,6 @@ class DatasetRecorder:
 
     def _register(self, saveable_type: type[Serializable]):
         self.writers[saveable_type] = CsvWriter(saveable_type)
-        self.readers[saveable_type] = CsvReader(saveable_type)
 
     def register_custom_saveable(self, saveable_type: type[Serializable]):
         if saveable_type in self.writers:
@@ -63,13 +60,3 @@ class DatasetRecorder:
 
         for writer in self.writers.values():
             writer.save_data_to_file(save_folder_path)
-
-    def get_datasets(self) -> list[str]:
-        return os.listdir(self.datasets_folder)
-
-    def load_geofence(self, dataset_name: str) -> list[GeofencePoint]:
-        folder_path = os.path.join(self.datasets_folder, dataset_name)
-
-        self.readers[GeofencePoint].load_data_from_file(folder_path)
-
-        return self.readers[GeofencePoint].data

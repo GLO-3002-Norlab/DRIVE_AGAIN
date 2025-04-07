@@ -12,7 +12,7 @@ class CsvReader(Generic[T]):
         self.loadable_type = loadable_type
         self.data: list[T] = []
 
-    def from_dict(self, data: dict) -> T:
+    def _from_dict(self, data: dict) -> T:
         return self.loadable_type(**data)
 
     def load_data_from_file(self, path: str):
@@ -25,4 +25,4 @@ class CsvReader(Generic[T]):
                 if skip_headers:
                     skip_headers = False
                 else:
-                    self.data.append(self.from_dict(row))
+                    self.data.append(self._from_dict(row))
