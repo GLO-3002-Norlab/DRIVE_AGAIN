@@ -191,7 +191,7 @@ class Drive:
         geofence_points = self.dataset_reader.load_geofence(dataset_name)
         if geofence_points:
             geofence_points_tuple: list[tuple[float, float]] = [(point.x, point.y) for point in geofence_points]
-            self.geofence = Geofence(geofence_points_tuple)
+            self.current_state.geofence_points = geofence_points_tuple  # type: ignore
             self.confirm_geofence(timestamp_ns)
 
     def skip_current_step(self, timestamp_ns: float):
