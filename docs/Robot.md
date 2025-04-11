@@ -10,7 +10,8 @@ Since localization, navigation and teleoperation is different from robot to robo
 
 You will need to provide two functions variable to the robot class to handle goal and command sending to your system.
 
-`self.send_command_fn`: When called, this function takes a linear and angular velocity and publishes the control command of your robot on a topic
+`self.send_command_fn`: When called, this function takes a linear and angular velocity and publishes the control command of your robot on a topic.
+
 `self.send_goal_fn`: When called, this function takes a goal pose and publishes the goal to your robot's navigation system.
 
 ### Subscribers
@@ -18,7 +19,9 @@ You will need to provide two functions variable to the robot class to handle goa
 Each of the following information will need to come from a topic of your system. Once you receive a message, you need to call the appropriate callback.
 
 `pose_callback`: This should be called from your robot's localization topic.
+
 `deadman_switch_callback`: This should be called from your robot's teleop topic.
+
 `goal_reached_callback`: This should be called from your robot's navigation topic once it has reached it's current goal.
 
 ### Example
