@@ -34,7 +34,7 @@ docker exec -it drive_ros bash -ic "ros2 run drive_ros keyboard_teleop"
 
 ## On your robot
 
-We assume that your robot runs on ROS2. Since every robot is different, you will have some topic configuration to do before being able to run a DRIVE experiment.
+We assume that your robot runs on ROS2. Since every robot is different, you will have some topic configuration to do before being able to run a DRIVE experiment. See [Configuration](Configuration.md) at a high level how DRIVE works
 
 Here is what you will need to know before configuring:
 
