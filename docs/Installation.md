@@ -1,6 +1,6 @@
 # Installation
 
-## Testing on your computer
+## On your computer (Test with a simulated differential drive robot)
 
 If you want to test DRIVE on your computer before using it on a real robot, follow these steps:
 
@@ -24,36 +24,23 @@ docker compose up -d
 ```
 
 4. Go on [http://localhost:5000](http://localhost:5000), you should see the user interface
-5. Launch a teleoperation node to control the virtual robot
+5. Launch a teleoperation node to control the virtual robot. When focused on the terminal, you can control the robot with wasd
 
 ```bash
 docker exec -it drive_ros bash -ic "ros2 run drive_ros keyboard_teleop"
 ```
 
-## Running tests
+6. Play around on the interface and control the robot on the terminal you launched the last command with
 
-```sh
-python -m pytest
-```
+## On your robot
 
-## Running code coverage
+We assume that your robot runs on ROS2. Since every robot is different, you will have some topic configuration to do before being able to run a DRIVE experiment.
 
-```sh
-coverage run --source=DRIVE_AGAIN -m pytest
-```
+Here is what you will need to know before configuring:
 
-and then run
+- How do you actuate your robot to execute a command (from linear and angular velocity)?
+- What is your localization topic and message?
+- What is you deadman switch topic and message?
+- From a goal pose, how do you instruct your robot to go autonomously to that pose? Then, how do you know if the goal is reached?
 
-```sh
-coverage report
-```
-
-or alternatively, for a nicer result, run
-
-```sh
-coverage html
-```
-
-and open the generated HTML file
-
-> Note that in order for changes in the base code to be applied, you will need to run `pip install .` between test runs.
+Once you have the answer to all these questions, you will need to jump into the `drive_ros_bridge` node and connect the previous topics accordingly.
