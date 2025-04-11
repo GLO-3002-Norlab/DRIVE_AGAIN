@@ -8,10 +8,10 @@ function updateTractionFields() {
         <label for="tireModel">Tire model:</label>
         <input type="text" id="tireModel" required />
   
-        <label for="treadDepth">Tread depth:</label>
+        <label for="treadDepth">Tread depth (m):</label>
         <input type="text" id="treadDepth" required />
   
-        <label for="tirePressure">Tire pressure (starting from front-right, clockwise):</label>
+        <label for="tirePressure">Tire pressure in Kpa (starting from front-right, clockwise):</label>
         <input type="text" id="tirePressure" required />
       `;
     } else if (tractionType === "tracked") {
@@ -50,6 +50,38 @@ function updateParticleSizeField() {
       `;
     }
 }
+
+document.getElementById("roboticist-select-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const firstName = document.getElementById("newRoboticistName").value.trim();
+    const lastName = document.getElementById("newRoboticistLastName").value.trim();
+    const email = document.getElementById("newRoboticistEmail").value.trim();
+    const yearsOfExperience = document.getElementById("newRoboticistExperience").value.trim();
+    const organisation = document.getElementById("newRoboticistOrg").value.trim();
+
+    if (!firstName || !lastName || !email || !yearsOfExperience || !organisation) {
+        alert("Please fill out all required fields.");
+        return;
+    }
+
+    if (!validateEmail(email)) {
+        alert("Please enter a valid email address.");
+        return;
+    }
+
+    const roboticistJson = {
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        years_of_experience: yearsOfExperience,
+        organisation: organisation,
+    };
+
+    console.log("Roboticist JSON:", roboticistJson);
+
+    closeModal();
+});
 
 document.getElementById("robot-select-form").addEventListener("submit", function (event) {
     event.preventDefault();
@@ -98,6 +130,30 @@ document.getElementById("robot-select-form").addEventListener("submit", function
     selectElement.insertBefore(newOption, lastOption);
     selectElement.value = newOption.value;
 
+    const robot_json = {
+        basic_information: {
+            name: name,
+            manufacturer_and_version: manufacturer,
+            is_the_platform_motor_or_traction_mecanism_or_battery_modified: modification,
+            total_weight_kg: weight,
+            noticed_asymetry_in_mouvement: asymmetry,
+            traction_mechanism: traction,
+            traction_details: tractionDetails,
+        },
+        additional_specification: {
+            has_suspension: suspension,
+            mesured_baseline_m: baseline,
+            mesured_wheel_radius_under_load_m: wheelRadius,
+        },
+        ground_truth_information: {
+            list_sensors_used_for_localization: sensors,
+            algorithms_used_to_fuse_these_sensors: algorithm,
+            localization_was_tested_at_robot_max_speeds: speedTest,
+        },
+    };
+
+    console.log("Robot JSON:", robot_json);
+
     closeModal();
 });
 
@@ -139,8 +195,38 @@ document.getElementById("terrain-select-form").addEventListener("submit", functi
     selectElement.insertBefore(newOption, lastOption);
     selectElement.value = newOption.value;
 
+    const terrain_json = {
+        terrain_conditions: {
+            terrain_where_experience_ran: terrainType,
+            is_the_terrain_uniform_where_drive_ran: terrainUniform,
+            deformable_or_hard: terrainHardness,
+            most_present_particle_size: particleSize,
+            list_of_visible_contamination: terrainContamination,
+            estimation_of_terrain_inclination_degrees: terrainInclination,
+            is_flat_or_bumpy: terrainFlatness,
+            is_wet: terrainWetness,
+        },
+        weather_conditions: {
+            wheater_when_drive_ran: weatherCondition,
+            day_or_night: weatherDayNight,
+            temperature_celsius: weatherTemperature,
+            is_ground_frozen: weatherGroundFrozen,
+            terrain_froze_last_night: weatherFreezeLastNight,
+        },
+    };
+
+    console.log("Terrain JSON:", terrain_json);
+
     closeModal();
 });
+
+const validateEmail = (email) => {
+    return String(email)
+        .toLowerCase()
+        .match(
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        );
+};
 
 function setupImagePreview(inputId, previewId) {
     document.getElementById(inputId).addEventListener("change", function (event) {

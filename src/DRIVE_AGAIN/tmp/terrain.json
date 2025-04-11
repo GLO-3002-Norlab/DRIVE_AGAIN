@@ -1,0 +1,19 @@
+{
+    "terrain_conditions": {
+        "terrain_where_experience_ran": "",
+        "is_the_terrain_uniform_where_drive_ran": true,
+        "deformable_or_hard": "hard",
+        "most_present_particle_size": "smaller_than_0.05 mm (clay)",
+        "list_of_visible_contamination": "",
+        "estimation_of_terrain_inclination_degrees": 90.0,
+        "is_flat_or_bumpy": "flat",
+        "is_wet": true
+    },
+    "weather_conditions": {
+        "wheater_when_drive_ran": ""
+        "day_or_night": "day",
+        "temperature_celsius": 3.3,
+        "is_ground_frozen": true,
+        "terrain_froze_last_night": true
+    }
+}

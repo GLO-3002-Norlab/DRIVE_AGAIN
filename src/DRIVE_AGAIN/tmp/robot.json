@@ -1,0 +1,27 @@
+{
+    "basic_information": {
+        "name": "robot_name",
+        "manufacturer_and_version": "",
+        "is_the_platform_motor_or_traction_mecanism_or_battery_modified": true,
+        "total_weight_kg": 9.0,
+        "noticed_asymetry_in_mouvement": true,
+        "traction_mechanism": "wheeled",
+        "tire_model": "",
+        "tread_depth": "",
+        "tire_pressure": "",
+        "model_of_tracks": "",
+        "number_of_legs": 4,
+        "specify_traction_mechanism": ""
+    },
+    "additional_specification": {
+        "has_suspension": true,
+        "mesured_baseline_m": 3.0,
+        "mesured_wheel_radius_under_load_m": 0.25
+    },
+    "ground_truth_information": {
+        "list_sensors_used_for_localization": "",
+        "algorithms_used_to_fuse_these_sensors": "",
+        "localization_was_tested_at_robot_max_speeds": true
+    }
+}
+
