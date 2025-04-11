@@ -44,6 +44,13 @@
       <input type="text" id="dataset-name-input" name="datasetName" required />
       <button type="submit">Save dataset</button>
     </form>
+
+    <form class="load-geofence-form" action="/submit" onsubmit="loadGeofence(event)">
+      <select id="dataset-load-select" onclick="updateDatasets()" required>
+        <option value="">Load datasets</option>
+      </select>
+      <button type="submit">Load geofence</button>
+    </form>
   </div>
 
   <main class="image-container">

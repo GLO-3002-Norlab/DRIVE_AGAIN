@@ -80,7 +80,14 @@ class DriveRosBridge(Node):
             self.max_angular_speed,
         )
         self.drive = Drive(self.robot, self.command_sampling_strategy, self.nb_steps, self.step_duration_s)
-        self.server = Server(self.start_drive_cb, self.start_geofence_cb, self.drive.save_dataset, self.skip_command_cb)
+        self.server = Server(
+            self.start_drive_cb,
+            self.start_geofence_cb,
+            self.drive.save_dataset,
+            self.load_geofence_cb,
+            self.drive.get_datasets,
+            self.skip_command_cb,
+        )
 
         # Interface setup
         self.interface_thread = Thread(target=self.server.run)
@@ -110,6 +117,10 @@ class DriveRosBridge(Node):
     def skip_command_cb(self):
         current_time_ns = self.get_clock().now().nanoseconds
         self.drive.skip_current_step(current_time_ns)
+
+    def load_geofence_cb(self, dataset_name: str):
+        current_time_ns = self.get_clock().now().nanoseconds
+        self.drive.load_geofence(dataset_name, current_time_ns)
 
     def send_command(self, command):
         msg = Twist()

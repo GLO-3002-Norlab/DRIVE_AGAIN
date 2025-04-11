@@ -1,12 +1,13 @@
 import logging
-import re
 import os
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 import numpy as np
 
 from DRIVE_AGAIN.common import Command, Pose
+from DRIVE_AGAIN.dataset_reader import DatasetReader
 from DRIVE_AGAIN.dataset_recorder import DatasetRecorder
 from DRIVE_AGAIN.geofencing import Geofence
 from DRIVE_AGAIN.robot import Robot
@@ -151,6 +152,7 @@ class Drive:
 
         experience_dir = os.path.join("/home", "root", "datasets")
         self.dataset_recorder = DatasetRecorder(experience_dir)
+        self.dataset_reader = DatasetReader(experience_dir)
 
         self.commands = []
 
@@ -181,6 +183,16 @@ class Drive:
 
     def save_dataset(self, dataset_name: str):
         self.dataset_recorder.save_experience(dataset_name)
+
+    def get_datasets(self) -> list[str]:
+        return self.dataset_reader.get_datasets()
+
+    def load_geofence(self, dataset_name: str, timestamp_ns: float):
+        geofence_points = self.dataset_reader.load_geofence(dataset_name)
+        if geofence_points:
+            geofence_points_tuple: list[tuple[float, float]] = [(point.x, point.y) for point in geofence_points]
+            self.current_state.geofence_points = geofence_points_tuple  # type: ignore
+            self.confirm_geofence(timestamp_ns)
 
     def skip_current_step(self, timestamp_ns: float):
         logging.info("Skipping command...")
@@ -216,7 +228,7 @@ class Drive:
         raise IllegalStateTransition(self.current_state.__class__.__name__, "restart_geofence")
 
     def confirm_geofence(self, timestamp_ns: float):
-        if self.current_state.__class__ == GeofenceCreationState:
+        if self.current_state.__class__ == GeofenceCreationState or self.current_state.__class__ == WaitingState:
             logging.info(f"Confirmed geofence at timestamp {timestamp_ns}")
             self.geofence = Geofence(self.current_state.geofence_points)  # type: ignore
             self.dataset_recorder.save_geofence(self.current_state.geofence_points)  # type: ignore
