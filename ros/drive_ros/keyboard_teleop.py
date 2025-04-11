@@ -50,9 +50,9 @@ This node takes keypresses from the keyboard and publishes them
 as Twist/TwistStamped messages. It works best with a US keyboard layout.
 ---------------------------
 Moving around:
-        i
-   j        l
-        k
+        w
+   a        d
+        s
 
 
 Deadman switch for autonomous mode: x
@@ -61,10 +61,10 @@ CTRL-C to quit
 """
 
 moveBindings = {
-    "i": (1, 0, 0, 0),
-    "j": (0, 0, 0, 1),
-    "l": (0, 0, 0, -1),
-    "k": (-1, 0, 0, 0),
+    "w": (1, 0, 0, 0),
+    "a": (0, 0, 0, 1),
+    "d": (0, 0, 0, -1),
+    "s": (-1, 0, 0, 0),
 }
 
 

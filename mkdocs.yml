@@ -35,5 +35,7 @@ theme:
 nav:
   - Home: "index.md"
   - Installation: "Installation.md"
-  - Developers:
-      - "Command Sampling": "CommandSampling.md"
+  - Configuration:
+      - "Robot Module": "Robot.md"
+      - "Drive Module": "Drive.md"
+      - "Command Sampling Module": "CommandSampling.md"

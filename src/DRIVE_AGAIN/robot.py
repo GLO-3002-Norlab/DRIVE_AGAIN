@@ -4,6 +4,15 @@ from DRIVE_AGAIN.common import Command, Pose
 
 
 class Robot:
+    """
+    The Robot class provides a simple interface to connect DRIVE to your robot's control, navigation and localization
+    systems. This class must be configured for each robot platform you want to use with DRIVE. First, you need to
+    provide how to send control commands and goal poses to your robot. Then, you need to configure your system to
+    call the necessary functions to update the robot's state.
+
+    See drive_ros_bridge.py for an example of how to use this class with ROS2.
+    """
+
     def __init__(
         self, initial_pose: Pose, send_command_fn: Callable[[Command], None], send_goal_fn: Callable[[Pose], None]
     ) -> None:
@@ -18,12 +27,6 @@ class Robot:
         self.poses_buffer.append((pose, timestamp_ns))
         self.pose = pose
 
-    def get_poses(self):
-        return self.poses_buffer
-
-    def empty_pose_buffer(self):
-        self.poses_buffer = []
-
     def deadman_switch_callback(self, pressed: bool) -> None:
         self.deadman_switch_pressed = pressed
 
@@ -36,3 +39,9 @@ class Robot:
     def send_goal(self, goal_pose: Pose) -> None:
         self.goal_reached = False
         self.send_goal_fn(goal_pose)
+
+    def get_poses(self):
+        return self.poses_buffer
+
+    def empty_pose_buffer(self):
+        self.poses_buffer = []
