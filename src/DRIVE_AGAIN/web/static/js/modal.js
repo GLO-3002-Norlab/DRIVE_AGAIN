@@ -65,10 +65,10 @@ document.getElementById("roboticist-select-form").addEventListener("submit", fun
         return;
     }
 
-    if (!validateEmail(email)) {
-        alert("Please enter a valid email address.");
-        return;
-    }
+    // if (!validateEmail(email)) {
+    //     alert("Please enter a valid email address.");
+    //     return;
+    // }
 
     const roboticistJson = {
         first_name: firstName,
@@ -220,13 +220,13 @@ document.getElementById("terrain-select-form").addEventListener("submit", functi
     closeModal();
 });
 
-const validateEmail = (email) => {
-    return String(email)
-        .toLowerCase()
-        .match(
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        );
-};
+// const validateEmail = (email) => {
+//     return String(email)
+//         .toLowerCase()
+//         .match(
+//             /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+//         );
+// };
 
 function setupImagePreview(inputId, previewId) {
     document.getElementById(inputId).addEventListener("change", function (event) {
