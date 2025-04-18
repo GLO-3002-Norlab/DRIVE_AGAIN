@@ -48,6 +48,9 @@ class Server:
     def skippable_state_end(self):
         self.socketio.emit("skippable_state_end")
 
+    def state_transition(self, state: str):
+        self.socketio.emit("state_transition", state)
+
     def create_server(
         self, start_drive_cb, start_geofencing_cb, save_dataset_cb, load_geofence_cb, get_datasets_cb, skip_command_cb
     ):

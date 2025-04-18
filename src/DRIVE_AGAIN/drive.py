@@ -140,6 +140,7 @@ class Drive:
         command_sampling_strategy: CommandSamplingStrategy,
         target_nb_steps: int,
         step_duration_s: float,
+        state_transition_cb,
     ):
         self.robot = robot
         self.command_sampling_strategy = command_sampling_strategy
@@ -156,14 +157,16 @@ class Drive:
 
         self.commands = []
 
-    def transition_to_new_state(self, new_state: DriveState, timestamp_ns: float):
+        self._state_transition_cb = state_transition_cb
+
+    def _transition_to_new_state(self, new_state: DriveState, timestamp_ns: float):
         self.dataset_recorder.save_state_transition(
             self.current_state.get_state_name(), new_state.get_state_name(), int(timestamp_ns)
         )
         self.current_state = new_state
+        self._state_transition_cb(new_state.get_state_name())
 
     def run(self, timestamp_ns: float):
-
         self.current_state.run(timestamp_ns)
 
     def sample_next_step(self, timestamp_ns: float):
@@ -214,7 +217,7 @@ class Drive:
         if self.current_state.__class__ == WaitingState:
             logging.info(f"Starting geofence creation at timestamp {timestamp_ns}")
 
-            self.transition_to_new_state(GeofenceCreationState(self), timestamp_ns)
+            self._transition_to_new_state(GeofenceCreationState(self), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "start_geofence")
@@ -222,7 +225,8 @@ class Drive:
     def restart_geofence(self, timestamp_ns: float):
         if self.current_state.__class__ == GeofenceCreationState:
             logging.info(f"Restarting geofence creation at timestamp {timestamp_ns}")
-            self.current_state = GeofenceCreationState(self)
+
+            self._transition_to_new_state(GeofenceCreationState(self), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "restart_geofence")
@@ -233,7 +237,7 @@ class Drive:
             self.geofence = Geofence(self.current_state.geofence_points)  # type: ignore
             self.dataset_recorder.save_geofence(self.current_state.geofence_points)  # type: ignore
 
-            self.transition_to_new_state(ReadyState(self), timestamp_ns)
+            self._transition_to_new_state(ReadyState(self), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "confirm_geofence")
@@ -243,7 +247,7 @@ class Drive:
             logging.info(f"Starting drive at timestamp {timestamp_ns}")
             self.sample_next_step(timestamp_ns)
 
-            self.transition_to_new_state(RunningState(self, timestamp_ns), timestamp_ns)
+            self._transition_to_new_state(RunningState(self, timestamp_ns), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "start_drive")
@@ -252,7 +256,7 @@ class Drive:
         if self.current_state.__class__ == RunningState:
             logging.info(f"Pausing drive at timestamp {timestamp_ns}")
 
-            self.transition_to_new_state(PausedState(self), timestamp_ns)
+            self._transition_to_new_state(PausedState(self), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "pause_drive")
@@ -264,7 +268,7 @@ class Drive:
             logging.info(f"Resuming drive at timestamp {timestamp_ns}")
             self.current_step.start_timestamp_ns = timestamp_ns
 
-            self.transition_to_new_state(RunningState(self, timestamp_ns), timestamp_ns)
+            self._transition_to_new_state(RunningState(self, timestamp_ns), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "resume_drive")
@@ -272,7 +276,7 @@ class Drive:
     def go_back_inside_geofence(self, timestamp_ns: float):
         if self.current_state.__class__ == RunningState and not self.is_robot_inside_geofence():
             logging.info(f"Going back to center at timestamp {timestamp_ns}")
-            self.transition_to_new_state(BackToCenterState(self, timestamp_ns), timestamp_ns)
+            self._transition_to_new_state(BackToCenterState(self, timestamp_ns), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "resume_drive")
@@ -280,7 +284,7 @@ class Drive:
     def stop_drive(self, timestamp_ns: float):
         if self.current_state.__class__ == RunningState:
             logging.info(f"Stopped at timestamp {timestamp_ns}")
-            self.transition_to_new_state(StoppedState(self), timestamp_ns)
+            self._transition_to_new_state(StoppedState(self), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "stop_drive")

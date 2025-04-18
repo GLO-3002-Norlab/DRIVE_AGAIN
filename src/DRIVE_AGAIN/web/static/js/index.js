@@ -66,6 +66,25 @@ socket.on("datasets", (data) => {
   select.value = v;
 });
 
+socket.on("confirm_geofence", (state) => {
+  console.log("confirm geofence called but how??");
+});
+
+socket.on("state_transition", (state) => {
+  console.log("state transition to: " + state);
+  const button = document.getElementById("mainButton");
+
+  switch (state) {
+    case "ready_state":
+      button.textContent = "Start Drive";
+      button.disabled = false;
+      stage = 1;
+      break;
+    default:
+      break;
+  }
+});
+
 
 //
 // Forms
