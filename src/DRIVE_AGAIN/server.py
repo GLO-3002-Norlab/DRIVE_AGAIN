@@ -92,6 +92,7 @@ class Server:
 
         @socketio.on("stop_drive")
         def stop_drive():
-            stop_drive_cb()
+            current_time = get_current_timestamp_ns()
+            drive.stop_drive(current_time)
 
         return app, socketio

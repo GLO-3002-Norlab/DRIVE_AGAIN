@@ -107,11 +107,6 @@ class DriveRosBridge(Node):
         # Interface visualization
         self.interface_server.update_visualization()
 
-    # def stop_drive_cb(self):
-    #     self.get_logger().info("STOPPING DRIVE (opens modal)")
-    #     current_time_ns = self.get_clock().now().nanoseconds
-    #     self.drive.stop_drive(current_time_ns)
-
     def send_command(self, command):
         msg = Twist()
         msg.linear.x = command[0]
