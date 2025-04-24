@@ -86,14 +86,6 @@ class DriveRosBridge(Node):
             self.step_duration_s,
             self.state_transition_cb,
         )
-        self.server = Server(
-            self.start_drive_cb,
-            self.start_geofence_cb,
-            self.drive.save_dataset,
-            self.load_geofence_cb,
-            self.drive.get_datasets,
-            self.skip_command_cb,
-        )
 
         # Interface setup
         self.interface_server = Server(self.drive, self.get_timestamp_ns)
