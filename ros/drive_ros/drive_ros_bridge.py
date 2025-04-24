@@ -1,5 +1,4 @@
 import logging
-import os
 from threading import Thread
 
 import numpy as np
@@ -10,13 +9,10 @@ from rclpy.node import Node
 from std_msgs.msg import Bool
 
 from DRIVE_AGAIN.common import Pose
-from DRIVE_AGAIN.data.dataset_recorder import DatasetRecorder
 from DRIVE_AGAIN.drive import Drive
 from DRIVE_AGAIN.robot import Robot
-from DRIVE_AGAIN.sampling import CommandSamplingFactory, RandomSampling
+from DRIVE_AGAIN.sampling import CommandSamplingFactory
 from DRIVE_AGAIN.server import Server
-
-WHEEL_BASE = 0.5
 
 
 def redirect_logging_to_ros2():
@@ -64,65 +60,57 @@ class DriveRosBridge(Node):
         self.declare_parameter("max_angular_speed", -1.0)
         self.declare_parameter("min_angular_speed", 1.0)
 
-        self.nb_steps = self.get_parameter("nb_steps").value
-        self.step_duration_s = self.get_parameter("step_duration_s").value
+        self.nb_steps: int = self.get_parameter("nb_steps").get_parameter_value().integer_value
+        self.step_duration_s: float = self.get_parameter("step_duration_s").get_parameter_value().double_value
         self.command_sampling_strategy_str = self.get_parameter("command_sampling_strategy").value
-        self.min_linear_speed = self.get_parameter("min_linear_speed").value
-        self.max_linear_speed = self.get_parameter("max_linear_speed").value
-        self.min_angular_speed = self.get_parameter("min_angular_speed").value
-        self.max_angular_speed = self.get_parameter("max_angular_speed").value
+        self.min_linear_speed: float = self.get_parameter("min_linear_speed").get_parameter_value().double_value
+        self.max_linear_speed: float = self.get_parameter("max_linear_speed").get_parameter_value().double_value
+        self.min_angular_speed: float = self.get_parameter("min_angular_speed").get_parameter_value().double_value
+        self.max_angular_speed: float = self.get_parameter("max_angular_speed").get_parameter_value().double_value
 
         # Drive core setup
         self.robot = Robot(initial_pose, self.send_command, self.send_goal)
         self.command_sampling_strategy = CommandSamplingFactory.create_sampling_strategy(
-            self.command_sampling_strategy_str,
+            self.command_sampling_strategy_str,  # type: ignore
             self.min_linear_speed,
             self.max_linear_speed,
             self.min_angular_speed,
             self.max_angular_speed,
         )
         self.drive = Drive(self.robot, self.command_sampling_strategy, self.nb_steps, self.step_duration_s)
-        self.server = Server(
-            self.start_drive_cb,
-            self.start_geofence_cb,
-            self.drive.save_dataset,
-            self.skip_command_cb,
-            self.stop_drive_cb,
-        )
 
         # Interface setup
-        self.interface_thread = Thread(target=self.server.run)
+        self.interface_server = Server(self.drive, self.get_timestamp_ns)
+        self.interface_thread = Thread(target=self.interface_server.run)
         self.interface_thread.start()
 
         # ROS setup
+        self.timer = self.create_timer(0.1, self.control_loop)
+
+        # Pubs
+        self.loc_sub = self.create_subscription(PoseStamped, "pose", self.loc_callback, 10)
+        self.deadman_sub = self.create_subscription(Bool, "deadman", self.deadman_callback, 10)
+
+        # Subs
         self.cmd_pub = self.create_publisher(Twist, "cmd_vel", 10)
         self.goal_pub = self.create_publisher(PoseStamped, "goal", 10)
-        self.loc_sub = self.create_subscription(PoseStamped, "pose", self.loc_callback, 10)
         self.goal_reached_sub = self.create_subscription(PoseStamped, "goal_reached", self.goal_reached_callback, 10)
-        self.deadman_sub = self.create_subscription(Bool, "deadman", self.deadman_callback, 10)
-        self.timer = self.create_timer(0.1, self.control_loop)
 
         self.get_logger().info("Drive ROS bridge started")
 
-    def start_drive_cb(self):
-        current_time_ns = self.get_clock().now().nanoseconds
-        # For now doing both at the same time
-        self.drive.confirm_geofence(current_time_ns)
-        self.drive.start_drive(current_time_ns + 1)
-        self.command_sampling_started = True
+    def control_loop(self):
+        current_time_ns = self.get_timestamp_ns()
 
-    def start_geofence_cb(self):
-        current_time_ns = self.get_clock().now().nanoseconds
-        self.drive.start_geofence(current_time_ns)
+        # Drive core loop
+        self.drive.run(current_time_ns)
 
-    def skip_command_cb(self):
-        current_time_ns = self.get_clock().now().nanoseconds
-        self.drive.skip_current_step(current_time_ns)
+        # Interface visualization
+        self.interface_server.update_visualization()
 
-    def stop_drive_cb(self):
-        self.get_logger().info("STOPPING DRIVE (opens modal)")
-        current_time_ns = self.get_clock().now().nanoseconds
-        self.drive.stop_drive(current_time_ns)
+    # def stop_drive_cb(self):
+    #     self.get_logger().info("STOPPING DRIVE (opens modal)")
+    #     current_time_ns = self.get_clock().now().nanoseconds
+    #     self.drive.stop_drive(current_time_ns)
 
     def send_command(self, command):
         msg = Twist()
@@ -149,20 +137,6 @@ class DriveRosBridge(Node):
     def goal_reached_callback(self, pose_msg: PoseStamped):
         self.robot.goal_reached_callback()
 
-    def control_loop(self):
-        current_time_ns = self.get_clock().now().nanoseconds
-        self.drive.run(current_time_ns)
-
-        geofence_points = self.drive.get_geofence_points()
-
-        self.server.update_robot_viz(self.robot.pose, geofence_points, WHEEL_BASE)
-        self.server.update_input_space(self.drive.get_commands())
-
-        if self.drive.can_skip_command():
-            self.server.skippable_state_start()
-        else:
-            self.server.skippable_state_end()
-
     def loc_callback(self, pose_msg: PoseStamped):
         quaternion = [
             pose_msg.pose.orientation.x,
@@ -181,6 +155,9 @@ class DriveRosBridge(Node):
 
     def deadman_callback(self, msg: Bool):
         self.robot.deadman_switch_callback(msg.data)
+
+    def get_timestamp_ns(self) -> float:
+        return self.get_clock().now().nanoseconds
 
 
 def main(args=None):

@@ -1,14 +1,13 @@
 import logging
 import os
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from enum import Enum
 
 import numpy as np
 
 from DRIVE_AGAIN.common import Command, Pose
-from DRIVE_AGAIN.data import dataset_recorder
-from DRIVE_AGAIN.data.dataset_recorder import DatasetRecorder
+from DRIVE_AGAIN.dataset_recorder import DatasetRecorder
 from DRIVE_AGAIN.geofencing import Geofence
 from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.sampling import CommandSamplingStrategy
@@ -32,6 +31,13 @@ class DriveState(ABC):
     @abstractmethod
     def run(self, timestamp_ns: float):
         pass
+
+    def get_state_name(self) -> str:
+        name = self.__class__.__name__
+        # Convert CamelCase to snake_case
+        s1 = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
+        snake_case = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
+        return snake_case
 
 
 class WaitingState(DriveState):
@@ -127,6 +133,13 @@ class BackToCenterState(DriveState):
 
 
 class Drive:
+    """
+    The Drive class is the main control loop for the DRIVE protocol. It manages the high-level state machine that
+    governs data collection, geofence creation and safety monitoring during autonomous drive sessions. It uses
+    a robot interface, a command sampling strategy, and a dataset recorder to execute and log drive sessions.
+    The 'run' method should be called in a main loop to execute the appropriate actions based on the current state.
+    """
+
     def __init__(
         self,
         robot: Robot,
@@ -148,8 +161,13 @@ class Drive:
 
         self.commands = []
 
-    def run(self, timestamp_ns: float):
+    def transition_to_new_state(self, new_state: DriveState, timestamp_ns: float):
+        self.dataset_recorder.save_state_transition(
+            self.current_state.get_state_name(), new_state.get_state_name(), int(timestamp_ns)
+        )
+        self.current_state = new_state
 
+    def run(self, timestamp_ns: float):
         self.current_state.run(timestamp_ns)
 
     def sample_next_step(self, timestamp_ns: float):
@@ -159,8 +177,6 @@ class Drive:
         logging.info(f"Sampling next command {command} at timestamp {timestamp_ns}")
 
         self.dataset_recorder.save_command(command, int(timestamp_ns))
-
-        self.current_state = RunningState(self, timestamp_ns)
 
     def is_robot_inside_geofence(self) -> bool:
         if self.geofence is None:
@@ -173,7 +189,7 @@ class Drive:
         self.dataset_recorder.save_experience(dataset_name)
 
     def skip_current_step(self, timestamp_ns: float):
-        logging.info(f"Skipping command...")
+        logging.info("Skipping command...")
         self.sample_next_step(timestamp_ns)
 
     def get_commands(self) -> np.ndarray:
@@ -191,7 +207,8 @@ class Drive:
     def start_geofence(self, timestamp_ns: float):
         if self.current_state.__class__ == WaitingState:
             logging.info(f"Starting geofence creation at timestamp {timestamp_ns}")
-            self.current_state = GeofenceCreationState(self)
+
+            self.transition_to_new_state(GeofenceCreationState(self), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "start_geofence")
@@ -208,7 +225,9 @@ class Drive:
         if self.current_state.__class__ == GeofenceCreationState:
             logging.info(f"Confirmed geofence at timestamp {timestamp_ns}")
             self.geofence = Geofence(self.current_state.geofence_points)  # type: ignore
-            self.current_state = ReadyState(self)
+            self.dataset_recorder.save_geofence(self.current_state.geofence_points)  # type: ignore
+
+            self.transition_to_new_state(ReadyState(self), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "confirm_geofence")
@@ -217,6 +236,8 @@ class Drive:
         if self.current_state.__class__ == ReadyState and self.current_step is None:
             logging.info(f"Starting drive at timestamp {timestamp_ns}")
             self.sample_next_step(timestamp_ns)
+
+            self.transition_to_new_state(RunningState(self, timestamp_ns), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "start_drive")
@@ -224,7 +245,8 @@ class Drive:
     def pause_drive(self, timestamp_ns: float):
         if self.current_state.__class__ == RunningState:
             logging.info(f"Pausing drive at timestamp {timestamp_ns}")
-            self.current_state = PausedState(self)
+
+            self.transition_to_new_state(PausedState(self), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "pause_drive")
@@ -235,7 +257,8 @@ class Drive:
         ) and self.current_step is not None:
             logging.info(f"Resuming drive at timestamp {timestamp_ns}")
             self.current_step.start_timestamp_ns = timestamp_ns
-            self.current_state = RunningState(self, timestamp_ns)
+
+            self.transition_to_new_state(RunningState(self, timestamp_ns), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "resume_drive")
@@ -243,7 +266,7 @@ class Drive:
     def go_back_inside_geofence(self, timestamp_ns: float):
         if self.current_state.__class__ == RunningState and not self.is_robot_inside_geofence():
             logging.info(f"Going back to center at timestamp {timestamp_ns}")
-            self.current_state = BackToCenterState(self, timestamp_ns)
+            self.transition_to_new_state(BackToCenterState(self, timestamp_ns), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "resume_drive")
@@ -251,7 +274,7 @@ class Drive:
     def stop_drive(self, timestamp_ns: float):
         if self.current_state.__class__ == RunningState:
             logging.info(f"Stopped at timestamp {timestamp_ns}")
-            self.current_state = StoppedState(self)
+            self.transition_to_new_state(StoppedState(self), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "stop_drive")
