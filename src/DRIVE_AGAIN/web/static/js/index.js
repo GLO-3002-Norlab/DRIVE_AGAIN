@@ -41,6 +41,17 @@ function saveDataset(event) {
   console.log("Dataset saved with name:", datasetName);
 }
 
+function updateDatasets() {
+  socket.emit("update_datasets");
+}
+
+function loadGeofence(event) {
+  event.preventDefault();
+  const datasetName = document.getElementById("dataset-load-select").value;
+  socket.emit("load_geofence", { name: datasetName });
+  console.log("Geofence loaded from name:", datasetName);
+}
+
 socket.on("input_space_update", (data) => {
   document.getElementById("input_space").src =
     `data:image/png;base64,${data.image_data}`;
@@ -57,6 +68,36 @@ socket.on("skippable_state_start", (data) => {
 
 socket.on("skippable_state_end", (data) => {
   document.getElementById("skip-command-button").disabled = true;
+});
+
+socket.on("datasets", (data) => {
+  let select = document.getElementById("dataset-load-select");
+  let v = select.value;
+  s = "";
+  data.forEach(d => {
+    s += "<option value=\"" + d + "\">" + d + "</option>";
+  });
+  select.innerHTML = s;
+  select.value = v;
+});
+
+socket.on("confirm_geofence", (state) => {
+  console.log("confirm geofence called but how??");
+});
+
+socket.on("state_transition", (state) => {
+  console.log("state transition to: " + state);
+  const button = document.getElementById("mainButton");
+
+  switch (state) {
+    case "ready_state":
+      button.textContent = "Start Drive";
+      button.disabled = false;
+      stage = 1;
+      break;
+    default:
+      break;
+  }
 });
 
 

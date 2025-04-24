@@ -44,6 +44,8 @@ def redirect_logging_to_ros2():
 
 
 class DriveRosBridge(Node):
+    server: Server
+
     def __init__(self):
         super().__init__("drive_ros_bridge", parameter_overrides=[])
 
@@ -77,7 +79,13 @@ class DriveRosBridge(Node):
             self.min_angular_speed,
             self.max_angular_speed,
         )
-        self.drive = Drive(self.robot, self.command_sampling_strategy, self.nb_steps, self.step_duration_s)
+        self.drive = Drive(
+            self.robot,
+            self.command_sampling_strategy,
+            self.nb_steps,
+            self.step_duration_s,
+            self.state_transition_cb,
+        )
 
         # Interface setup
         self.interface_server = Server(self.drive, self.get_timestamp_ns)
@@ -106,6 +114,13 @@ class DriveRosBridge(Node):
 
         # Interface visualization
         self.interface_server.update_visualization()
+
+    def load_geofence_cb(self, dataset_name: str):
+        current_time_ns = self.get_clock().now().nanoseconds
+        self.drive.load_geofence(dataset_name, current_time_ns)
+
+    def state_transition_cb(self, state: str):
+        self.interface_server.state_transition(state)
 
     def send_command(self, command):
         msg = Twist()

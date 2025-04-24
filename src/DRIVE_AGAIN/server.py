@@ -9,7 +9,7 @@ from flask_socketio import SocketIO
 from matplotlib.figure import Figure
 
 from DRIVE_AGAIN.common import Pose
-from DRIVE_AGAIN.drive import Drive
+from DRIVE_AGAIN.drive import Drive, GeofenceCreationState
 from DRIVE_AGAIN.plot import draw_input_space, draw_robot_visualization_figure
 
 WHEEL_BASE = 0.5
@@ -60,6 +60,9 @@ class Server:
     def skippable_state_end(self):
         self.socketio.emit("skippable_state_end")
 
+    def state_transition(self, state: str):
+        self.socketio.emit("state_transition", state)
+
     def create_server(self, drive: Drive, get_current_timestamp_ns: Callable[[], float]):
         app = Flask(__name__, static_url_path="/static", static_folder="web/static", template_folder="web/templates")
         socketio = SocketIO(app)
@@ -72,7 +75,8 @@ class Server:
         def start_drive():
             current_time = get_current_timestamp_ns()
             # For now doing both at the same time
-            drive.confirm_geofence(current_time)
+            if drive.current_state.__class__ == GeofenceCreationState:
+                drive.confirm_geofence(current_time)
             drive.start_drive(current_time + 1)
 
         @socketio.on("start_geofencing")
@@ -84,6 +88,16 @@ class Server:
         def save_dataset(data):
             dataset_name = data.get("name")
             drive.save_dataset(dataset_name)
+
+        @socketio.on("update_datasets")
+        def update_datasets():
+            self.socketio.emit("datasets", drive.get_datasets())
+
+        @socketio.on("load_geofence")
+        def load_geofence(data):
+            current_time = get_current_timestamp_ns()
+            dataset_name = data.get("name")
+            drive.load_geofence(dataset_name, current_time)
 
         @socketio.on("skip_command")
         def skip_command():

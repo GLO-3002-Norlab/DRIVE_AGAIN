@@ -39,13 +39,20 @@
 
     <button id="skip-command-button" onclick="skipCommandButtonClick()" disabled="true">Skip Command</button>
 
+    <button id="stop-button" onclick="stopButtonClick()" disabled="true">Stop Drive</button>
+
     <form class="save-dataset-form" action="/submit" onsubmit="saveDataset(event)">
       <label for="dataset-name-input">Dataset name : </label>
       <input type="text" id="dataset-name-input" name="datasetName" required />
       <button type="submit">Save dataset</button>
     </form>
 
-    <button id="stop-button" onclick="stopButtonClick()" disabled="true">Stop Drive</button>
+    <form class="load-geofence-form" action="/submit" onsubmit="loadGeofence(event)">
+      <select id="dataset-load-select" onclick="updateDatasets()" required>
+        <option value="">Load datasets</option>
+      </select>
+      <button type="submit">Load geofence</button>
+    </form>
   </div>
 
   <main class="image-container">
