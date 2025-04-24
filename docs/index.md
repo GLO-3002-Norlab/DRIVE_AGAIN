@@ -20,7 +20,7 @@ Here is the typical workflow of a DRIVE deployment:
 
 1. Start the docker container on your robot
 2. Access the web interface from your device
-3. (Optional) Fill out the metadata for your experiment
+3. Fill out the metadata for your experiment
 4. Move the robot around to draw a geofence, an invisible barrier that the robot can't cross when collecting data
 5. Confirm the geofence on the web interface
 6. Place the robot inside of the geofence

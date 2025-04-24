@@ -1,5 +1,6 @@
 import base64
 import io
+from typing import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,22 +9,33 @@ from flask_socketio import SocketIO
 from matplotlib.figure import Figure
 
 from DRIVE_AGAIN.common import Pose
+from DRIVE_AGAIN.drive import Drive
 from DRIVE_AGAIN.plot import draw_input_space, draw_robot_visualization_figure
+
+WHEEL_BASE = 0.5
 
 
 class Server:
-    def __init__(
-        self, start_drive_cb, start_geofencing_cb, save_dataset_cb, load_geofence_cb, get_datasets_cb, skip_command_cb
-    ):
-        self.app, self.socketio = self.create_server(
-            start_drive_cb, start_geofencing_cb, save_dataset_cb, load_geofence_cb, get_datasets_cb, skip_command_cb
-        )
+    def __init__(self, drive: Drive, get_current_timestamp_ns: Callable[[], float]):
+        self.app, self.socketio = self.create_server(drive, get_current_timestamp_ns)
 
+        self.drive = drive
         self.fig_viz, self.ax_viz = plt.subplots()
         self.fig_input_space, self.ax_input_space = plt.subplots()
 
     def run(self):
         self.socketio.run(self.app, host="0.0.0.0", debug=False, allow_unsafe_werkzeug=True, use_reloader=False)
+
+    def update_visualization(self):
+        geofence_points = self.drive.get_geofence_points()
+
+        self.update_robot_viz(self.drive.robot.pose, geofence_points, WHEEL_BASE)
+        self.update_input_space(self.drive.get_commands())
+
+        if self.drive.can_skip_command():
+            self.skippable_state_start()
+        else:
+            self.skippable_state_end()
 
     def encode_fig_to_b64(self, fig: Figure):
         buffer = io.BytesIO()
@@ -51,9 +63,7 @@ class Server:
     def state_transition(self, state: str):
         self.socketio.emit("state_transition", state)
 
-    def create_server(
-        self, start_drive_cb, start_geofencing_cb, save_dataset_cb, load_geofence_cb, get_datasets_cb, skip_command_cb
-    ):
+    def create_server(self, drive: Drive, get_current_timestamp_ns: Callable[[], float]):
         app = Flask(__name__, static_url_path="/static", static_folder="web/static", template_folder="web/templates")
         socketio = SocketIO(app)
 
@@ -63,28 +73,34 @@ class Server:
 
         @socketio.on("start_drive")
         def start_drive():
-            start_drive_cb()
+            current_time = get_current_timestamp_ns()
+            # For now doing both at the same time
+            drive.confirm_geofence(current_time)
+            drive.start_drive(current_time + 1)
 
         @socketio.on("start_geofencing")
         def start_geofencing():
-            start_geofencing_cb()
+            current_time = get_current_timestamp_ns()
+            drive.start_geofence(current_time)
 
         @socketio.on("save_dataset")
         def save_dataset(data):
             dataset_name = data.get("name")
-            save_dataset_cb(dataset_name)
+            drive.save_dataset(dataset_name)
 
         @socketio.on("update_datasets")
         def update_datasets():
-            self.socketio.emit("datasets", get_datasets_cb())
+            self.socketio.emit("datasets", drive.get_datasets())
 
         @socketio.on("load_geofence")
         def load_geofence(data):
+            current_time = get_current_timestamp_ns()
             dataset_name = data.get("name")
-            load_geofence_cb(dataset_name)
+            drive.load_geofence(dataset_name, current_time)
 
         @socketio.on("skip_command")
         def skip_command():
-            skip_command_cb()
+            current_time = get_current_timestamp_ns()
+            drive.skip_current_step(current_time)
 
         return app, socketio

@@ -7,12 +7,23 @@ from DRIVE_AGAIN.common import Command
 
 
 class CommandSamplingStrategy(ABC):
+    """
+    Abstract base class for command sampling strategies.
+
+    Subclasses must implement the `sample_command` method to return a motion command,
+    typically represented as a 2D numpy array [v_x, omega_z] (linear velocity, angular velocity).
+    """
+
     @abstractmethod
     def sample_command(self) -> Command:
         pass
 
 
 class RandomSampling(CommandSamplingStrategy):
+    """
+    Samples linear and angular speeds from uniform distributions defined by min/max bounds.
+    """
+
     def __init__(self, min_linear_speed, max_linear_speed, min_angular_speed, max_angular_speed):
         self.min_linear_speed = min_linear_speed
         self.max_linear_speed = max_linear_speed

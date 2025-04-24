@@ -14,8 +14,6 @@ from DRIVE_AGAIN.robot import Robot
 from DRIVE_AGAIN.sampling import CommandSamplingFactory
 from DRIVE_AGAIN.server import Server
 
-WHEEL_BASE = 0.5
-
 
 def redirect_logging_to_ros2():
     ros2_logger = rclpy.logging.get_logger("DRIVE_AGAIN")  # type: ignore
@@ -98,33 +96,32 @@ class DriveRosBridge(Node):
         )
 
         # Interface setup
-        self.interface_thread = Thread(target=self.server.run)
+        self.interface_server = Server(self.drive, self.get_timestamp_ns)
+        self.interface_thread = Thread(target=self.interface_server.run)
         self.interface_thread.start()
 
         # ROS setup
+        self.timer = self.create_timer(0.1, self.control_loop)
+
+        # Pubs
+        self.loc_sub = self.create_subscription(PoseStamped, "pose", self.loc_callback, 10)
+        self.deadman_sub = self.create_subscription(Bool, "deadman", self.deadman_callback, 10)
+
+        # Subs
         self.cmd_pub = self.create_publisher(Twist, "cmd_vel", 10)
         self.goal_pub = self.create_publisher(PoseStamped, "goal", 10)
-        self.loc_sub = self.create_subscription(PoseStamped, "pose", self.loc_callback, 10)
         self.goal_reached_sub = self.create_subscription(PoseStamped, "goal_reached", self.goal_reached_callback, 10)
-        self.deadman_sub = self.create_subscription(Bool, "deadman", self.deadman_callback, 10)
-        self.timer = self.create_timer(0.1, self.control_loop)
 
         self.get_logger().info("Drive ROS bridge started")
 
-    def start_drive_cb(self):
-        current_time_ns = self.get_clock().now().nanoseconds
-        # For now doing both at the same time
-        self.drive.confirm_geofence(current_time_ns)
-        self.drive.start_drive(current_time_ns + 1)
-        self.command_sampling_started = True
+    def control_loop(self):
+        current_time_ns = self.get_timestamp_ns()
 
-    def start_geofence_cb(self):
-        current_time_ns = self.get_clock().now().nanoseconds
-        self.drive.start_geofence(current_time_ns)
+        # Drive core loop
+        self.drive.run(current_time_ns)
 
-    def skip_command_cb(self):
-        current_time_ns = self.get_clock().now().nanoseconds
-        self.drive.skip_current_step(current_time_ns)
+        # Interface visualization
+        self.interface_server.update_visualization()
 
     def load_geofence_cb(self, dataset_name: str):
         current_time_ns = self.get_clock().now().nanoseconds
@@ -158,20 +155,6 @@ class DriveRosBridge(Node):
     def goal_reached_callback(self, pose_msg: PoseStamped):
         self.robot.goal_reached_callback()
 
-    def control_loop(self):
-        current_time_ns = self.get_clock().now().nanoseconds
-        self.drive.run(current_time_ns)
-
-        geofence_points = self.drive.get_geofence_points()
-
-        self.server.update_robot_viz(self.robot.pose, geofence_points, WHEEL_BASE)
-        self.server.update_input_space(self.drive.get_commands())
-
-        if self.drive.can_skip_command():
-            self.server.skippable_state_start()
-        else:
-            self.server.skippable_state_end()
-
     def loc_callback(self, pose_msg: PoseStamped):
         quaternion = [
             pose_msg.pose.orientation.x,
@@ -190,6 +173,9 @@ class DriveRosBridge(Node):
 
     def deadman_callback(self, msg: Bool):
         self.robot.deadman_switch_callback(msg.data)
+
+    def get_timestamp_ns(self) -> float:
+        return self.get_clock().now().nanoseconds
 
 
 def main(args=None):
