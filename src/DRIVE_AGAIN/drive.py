@@ -288,9 +288,10 @@ class Drive:
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "resume_drive")
 
-    def stop_drive(self, timestamp_ns: float):
-        if self.current_state.__class__ == RunningState:
+    def stop_drive(self, reason: str, timestamp_ns: float):
+        if self.current_state.__class__ == RunningState or self.current_state.__class__ == PausedState:
             logging.info(f"Stopped at timestamp {timestamp_ns}")
+            self.dataset_recorder.save_stop_reason(reason)
             self._transition_to_new_state(StoppedState(self), timestamp_ns)
             return
 

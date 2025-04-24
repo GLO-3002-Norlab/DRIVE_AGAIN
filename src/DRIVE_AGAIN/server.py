@@ -105,8 +105,9 @@ class Server:
             drive.skip_current_step(current_time)
 
         @socketio.on("stop_drive")
-        def stop_drive():
+        def stop_drive(data):
             current_time = get_current_timestamp_ns()
-            drive.stop_drive(current_time)
+            reason = data.get("reason")
+            drive.stop_drive(reason, current_time)
 
         return app, socketio

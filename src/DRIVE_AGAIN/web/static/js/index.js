@@ -10,7 +10,16 @@ function stopButtonClick() {
   const stopButton = document.getElementById("stop-button");
 
   if (stage > 1) {
-    socket.emit("stop_drive");
+    document.getElementById("stop-modal").style.display = "flex";
+  }
+}
+
+function closeStopModal(response) {
+  console.log("close stop modal");
+  console.log(response);
+  document.getElementById("stop-modal").style.display = "none";
+  if (response) {
+    socket.emit("stop_drive", { reason: response });
     button.textContent = "Start Drive";
     button.disabled = false;
     stage = 1;
