@@ -9,7 +9,7 @@ from flask_socketio import SocketIO
 from matplotlib.figure import Figure
 
 from DRIVE_AGAIN.common import Pose
-from DRIVE_AGAIN.drive import Drive
+from DRIVE_AGAIN.drive import Drive, GeofenceCreationState
 from DRIVE_AGAIN.plot import draw_input_space, draw_robot_visualization_figure
 
 WHEEL_BASE = 0.5
@@ -75,7 +75,8 @@ class Server:
         def start_drive():
             current_time = get_current_timestamp_ns()
             # For now doing both at the same time
-            drive.confirm_geofence(current_time)
+            if drive.current_state.__class__ == GeofenceCreationState:
+                drive.confirm_geofence(current_time)
             drive.start_drive(current_time + 1)
 
         @socketio.on("start_geofencing")

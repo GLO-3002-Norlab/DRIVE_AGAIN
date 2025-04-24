@@ -120,7 +120,7 @@ class DriveRosBridge(Node):
         self.drive.load_geofence(dataset_name, current_time_ns)
 
     def state_transition_cb(self, state: str):
-        self.server.state_transition(state)
+        self.interface_server.state_transition(state)
 
     def send_command(self, command):
         msg = Twist()
