@@ -8,10 +8,10 @@ For reference, here is a more non-extensive UML diagram for the python core. It 
 
 ![UML for python core](images/core_uml.png)
 
-So, the `DriveRosBridge` class need to instanciate and interact with four classes: `Robot`, `CommandSampling`, `Drive` and `Server` to be able to run the DRIVE protocol. Here is how to configure each module with your robot: 
+So, the `DriveRosBridge` class need to instanciate and interact with four classes: `Robot`, `CommandSampling`, `Drive` and `Server` to be able to run the DRIVE protocol. Here is how to configure each module with your robot:
+
 - [Robot Module](Robot.md)
+
 - [Drive Module](Drive.md)
+
 - [Command Sampling Module](CommandSampling.md)
-
-
-
