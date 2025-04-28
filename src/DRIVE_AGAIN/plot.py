@@ -10,6 +10,11 @@ def draw_robot_visualization_figure(ax: Axes, pose: Pose, geofence_points: np.nd
     ax.clear()
     ax.set_xlim(-15, 15)
     ax.set_ylim(-15, 15)
+
+    ax.set_xlabel("Position X [m]")
+    ax.set_ylabel("Position Y [m]")
+    ax.set_title("Robot's position")
+    
     draw_incomplete_geofence(ax, geofence_points)
     draw_robot(ax, pose, wheel_base)
 
