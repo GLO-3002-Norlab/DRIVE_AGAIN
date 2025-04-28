@@ -22,7 +22,7 @@ def prepare_axes(ax: Axes) -> None:
 def draw_robot_visualization_figure(ax: Axes, pose: Pose, geofence_points: np.ndarray, wheel_base: float) -> None:
     ax.clear()
     prepare_axes(ax)
-    
+
     ax.set_xlim(-15, 15)
     ax.set_ylim(-15, 15)
 
@@ -30,7 +30,7 @@ def draw_robot_visualization_figure(ax: Axes, pose: Pose, geofence_points: np.nd
     ax.set_ylabel("Position Y [m]")
     ax.set_title("Robot's position")
 
-    draw_incomplete_geofence(ax, geofence_points)
+    draw_geofence(ax, geofence_points)
     draw_robot(ax, pose, wheel_base)
 
 
@@ -86,15 +86,6 @@ def draw_robot(ax: Axes, pose: Pose, wheel_base: float) -> None:
     ax.add_patch(right_wheel)
 
 
-def draw_incomplete_geofence(ax: Axes, geofence_points: np.ndarray) -> None:
+def draw_geofence(ax: Axes, geofence_points: np.ndarray) -> None:
     if len(geofence_points) > 0:
         ax.plot(geofence_points[:, 0], geofence_points[:, 1], marker="o", linestyle="-", color="r", markersize=4)
-
-
-def draw_geofence(ax: Axes, geofence: Geofence) -> None:
-    geofence_coords = np.array(geofence.polygon.exterior.coords)
-    polygon = matplotlib.patches.Polygon(
-        geofence_coords, closed=True, edgecolor="blue", facecolor="none", lw=1, linestyle=":", markersize=4
-    )
-
-    ax.add_patch(polygon)
