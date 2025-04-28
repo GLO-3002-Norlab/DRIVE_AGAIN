@@ -6,8 +6,23 @@ from DRIVE_AGAIN.geofencing import Geofence
 from DRIVE_AGAIN.common import Pose
 
 
+def prepare_axes(ax: Axes) -> None:
+    """Set axes style for transparent background and white drawings."""
+    ax.set_facecolor('none')
+    ax.figure.set_facecolor('none')
+    ax.tick_params(colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.title.set_color('white')
+    ax.spines['bottom'].set_color('white')
+    ax.spines['top'].set_color('white')
+    ax.spines['right'].set_color('white')
+    ax.spines['left'].set_color('white')
+
 def draw_robot_visualization_figure(ax: Axes, pose: Pose, geofence_points: np.ndarray, wheel_base: float) -> None:
     ax.clear()
+    prepare_axes(ax)
+    
     ax.set_xlim(-15, 15)
     ax.set_ylim(-15, 15)
 
@@ -21,6 +36,8 @@ def draw_robot_visualization_figure(ax: Axes, pose: Pose, geofence_points: np.nd
 
 def draw_input_space(ax: Axes, commands: np.ndarray) -> None:
     ax.clear()
+    prepare_axes(ax)
+
     ax.set_xlim(-1, 1)
     ax.set_ylim(0, 0.2)
 
