@@ -19,6 +19,7 @@ def prepare_axes(ax: Axes) -> None:
     ax.spines['right'].set_color('white')
     ax.spines['left'].set_color('white')
 
+
 def draw_robot_visualization_figure(ax: Axes, pose: Pose, geofence_points: np.ndarray, wheel_base: float) -> None:
     ax.clear()
     prepare_axes(ax)
