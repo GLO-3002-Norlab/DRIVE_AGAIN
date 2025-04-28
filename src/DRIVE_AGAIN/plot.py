@@ -1,22 +1,22 @@
+from DRIVE_AGAIN.common import Pose
 from matplotlib.axes import Axes
 import matplotlib
 import matplotlib.patches
 import numpy as np
-from DRIVE_AGAIN.common import Pose
 
 
 def prepare_axes(ax: Axes) -> None:
     """Set axes style for transparent background and white drawings."""
-    ax.set_facecolor('none')
-    ax.figure.set_facecolor('none')
-    ax.tick_params(colors='white')
-    ax.xaxis.label.set_color('white')
-    ax.yaxis.label.set_color('white')
-    ax.title.set_color('white')
-    ax.spines['bottom'].set_color('white')
-    ax.spines['top'].set_color('white')
-    ax.spines['right'].set_color('white')
-    ax.spines['left'].set_color('white')
+    ax.set_facecolor("none")
+    ax.figure.set_facecolor("none")
+    ax.tick_params(colors="white")
+    ax.xaxis.label.set_color("white")
+    ax.yaxis.label.set_color("white")
+    ax.title.set_color("white")
+    ax.spines["bottom"].set_color("white")
+    ax.spines["top"].set_color("white")
+    ax.spines["right"].set_color("white")
+    ax.spines["left"].set_color("white")
 
 
 def draw_robot_visualization_figure(ax: Axes, pose: Pose, geofence_points: np.ndarray, wheel_base: float) -> None:
