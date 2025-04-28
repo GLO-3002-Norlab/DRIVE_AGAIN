@@ -65,7 +65,9 @@ body {
 }
 
 #mainButton {
-  width: 100%;
+  margin-left: auto;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
 }
 
 .bottom-bar {
