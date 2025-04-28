@@ -14,7 +14,7 @@ def draw_robot_visualization_figure(ax: Axes, pose: Pose, geofence_points: np.nd
     ax.set_xlabel("Position X [m]")
     ax.set_ylabel("Position Y [m]")
     ax.set_title("Robot's position")
-    
+
     draw_incomplete_geofence(ax, geofence_points)
     draw_robot(ax, pose, wheel_base)
 
@@ -24,8 +24,8 @@ def draw_input_space(ax: Axes, commands: np.ndarray) -> None:
     ax.set_xlim(-1, 1)
     ax.set_ylim(0, 0.2)
 
-    ax.set_xlabel("v_yaw")
-    ax.set_ylabel("v_x")
+    ax.set_xlabel("Angular command [rad/s]")
+    ax.set_ylabel("Linear command [m/s]")
     ax.set_title("Input space")
 
     if len(commands) > 0:
