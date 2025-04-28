@@ -1,8 +1,6 @@
-from matplotlib.axes import Axes
 import matplotlib
-import matplotlib.animation
 import matplotlib.patches
-import matplotlib
+from matplotlib.axes import Axes
 import numpy as np
 from DRIVE_AGAIN.geofencing import Geofence
 from DRIVE_AGAIN.common import Pose
