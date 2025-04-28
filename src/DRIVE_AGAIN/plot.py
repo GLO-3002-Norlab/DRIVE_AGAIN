@@ -1,8 +1,7 @@
+from matplotlib.axes import Axes
 import matplotlib
 import matplotlib.patches
-from matplotlib.axes import Axes
 import numpy as np
-from DRIVE_AGAIN.geofencing import Geofence
 from DRIVE_AGAIN.common import Pose
 
 
@@ -18,6 +17,7 @@ def prepare_axes(ax: Axes) -> None:
     ax.spines['top'].set_color('white')
     ax.spines['right'].set_color('white')
     ax.spines['left'].set_color('white')
+
 
 def draw_robot_visualization_figure(ax: Axes, pose: Pose, geofence_points: np.ndarray, wheel_base: float) -> None:
     ax.clear()
