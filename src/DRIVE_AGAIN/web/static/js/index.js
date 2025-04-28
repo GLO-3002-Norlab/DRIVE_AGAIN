@@ -116,12 +116,6 @@ function setTotalSteps(total) {
   document.getElementById('total-steps').textContent = total;
 }
 
-function nextStep() {
-  const currentStepElem = document.getElementById('current-step');
-  let current = parseInt(currentStepElem.textContent, 10);
-  currentStepElem.textContent = current + 1;
-}
-
 function skipCommandButtonClick() {
   socket.emit("skip_command");
 }
