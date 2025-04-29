@@ -49,10 +49,11 @@ def draw_input_space(ax: Axes, commands: np.ndarray) -> None:
         ax.scatter(angular, linear)
 
         angular_max = np.max(np.abs(angular)) * 1.1
+        linear_min = np.min(linear) * 1.1
         linear_max = np.max(np.abs(linear)) * 1.1
 
         ax.set_xlim(min(-angular_max, -1), max(angular_max, 1))
-        ax.set_ylim(0, max(linear_max, 0.2))
+        ax.set_ylim(min(linear_min, 0), max(linear_max, 0.2))
     else:
         ax.set_xlim(-1, 1)
         ax.set_ylim(0, 0.2)
