@@ -22,14 +22,20 @@ function saveDataset(event) {
   console.log("Dataset saved with name:", datasetName);
 }
 
+function isLightMode() {
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+}
+
 socket.on("input_space_update", (data) => {
-  document.getElementById("input_space").src =
-    `data:image/png;base64,${data.image_data}`;
+  const img = document.getElementById("input_space");
+  img.src = `data:image/png;base64,${data.image_data}`;
+  img.classList.toggle("invert-if-light-mode", isLightMode());
 });
 
 socket.on("robot_vizualisation_update", (data) => {
-  document.getElementById("robot_viz").src =
-    `data:image/png;base64,${data.image_data}`;
+  const img = document.getElementById("robot_viz");
+  img.src = `data:image/png;base64,${data.image_data}`;
+  img.classList.toggle("invert-if-light-mode", isLightMode());
 });
 
 socket.on("skippable_state_start", (data) => {
