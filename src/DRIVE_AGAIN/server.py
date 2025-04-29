@@ -12,7 +12,7 @@ from DRIVE_AGAIN.common import Pose
 from DRIVE_AGAIN.drive import Drive, GeofenceCreationState
 from DRIVE_AGAIN.plot import draw_input_space, draw_robot_visualization_figure
 
-WHEEL_BASE = 0.5
+WHEEL_BASE = 1.5
 
 
 class Server:

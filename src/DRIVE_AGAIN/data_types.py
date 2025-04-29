@@ -72,6 +72,7 @@ class DriveStep(Serializable):
     step_id: int
     commanded_linear_velocity: float  # m/s
     commanded_angular_velocity: float  # rad/s
+    is_completed: bool
 
 
 @dataclass

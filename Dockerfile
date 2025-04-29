@@ -21,7 +21,7 @@ WORKDIR /home/root/ros2_ws
 COPY ros/ src/
 RUN rosdep install --from-paths src -y --ignore-src --rosdistro ${ROS_DISTRO}
 RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
-    colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+    colcon build --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_EXPORT_COMPILE_COMMANDS=1
 
 # Adding source to bashrc
 RUN echo "source /home/root/ros2_ws/install/setup.bash" >> /root/.bashrc

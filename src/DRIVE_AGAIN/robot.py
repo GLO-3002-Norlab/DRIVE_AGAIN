@@ -22,10 +22,18 @@ class Robot:
         self.send_goal_fn = send_goal_fn
         self.goal_reached = False
         self.poses_buffer = []
+        self.speeds_buffer = []
+        self.accelerations_buffer = []
 
     def pose_callback(self, pose: Pose, timestamp_ns: int) -> None:
         self.poses_buffer.append((pose, timestamp_ns))
         self.pose = pose
+
+    def speed_callback(self, speed: Pose, timestamp_ns: int) -> None:
+        self.speeds_buffer.append((speed, timestamp_ns))
+
+    def acceleration_callback(self, acceleration: Pose, timestamp_ns: int) -> None:
+        self.accelerations_buffer.append((acceleration, timestamp_ns))
 
     def deadman_switch_callback(self, pressed: bool) -> None:
         self.deadman_switch_pressed = pressed
@@ -40,8 +48,7 @@ class Robot:
         self.goal_reached = False
         self.send_goal_fn(goal_pose)
 
-    def get_poses(self):
-        return self.poses_buffer
-
-    def empty_pose_buffer(self):
+    def empty_buffers(self):
         self.poses_buffer = []
+        self.speeds_buffer = []
+        self.accelerations_buffer = []
