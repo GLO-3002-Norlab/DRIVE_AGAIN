@@ -38,15 +38,24 @@ def draw_input_space(ax: Axes, commands: np.ndarray) -> None:
     ax.clear()
     prepare_axes(ax)
 
-    ax.set_xlim(-1, 1)
-    ax.set_ylim(0, 0.2)
-
     ax.set_xlabel("Angular command [rad/s]")
     ax.set_ylabel("Linear command [m/s]")
     ax.set_title("Input space")
 
     if len(commands) > 0:
-        ax.scatter(commands[:, 1], commands[:, 0])
+        angular = commands[:, 1]
+        linear = commands[:, 0]
+
+        ax.scatter(angular, linear)
+
+        angular_max = np.max(np.abs(angular)) * 1.1
+        linear_max = np.max(np.abs(linear)) * 1.1
+
+        ax.set_xlim(min(-angular_max, -1), max(angular_max, 1))
+        ax.set_ylim(0, max(linear_max, 0.2))
+    else:
+        ax.set_xlim(-1, 1)
+        ax.set_ylim(0, 0.2)
 
 
 def draw_robot(ax: Axes, pose: Pose, wheel_base: float) -> None:
