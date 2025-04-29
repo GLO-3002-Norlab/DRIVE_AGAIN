@@ -1,9 +1,9 @@
-from dataclasses import dataclass
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 
 @dataclass
-class Saveable(ABC):
+class Serializable(ABC):
     @classmethod
     def headers(cls) -> list[str]:
         return list(cls.__annotations__.keys())
@@ -15,7 +15,7 @@ class Saveable(ABC):
 
 
 @dataclass
-class Position6DOF(Saveable):
+class Position6DOF(Serializable):
     @staticmethod
     def get_filename() -> str:
         return "positions"
@@ -31,7 +31,7 @@ class Position6DOF(Saveable):
 
 
 @dataclass
-class Speed6DOF(Saveable):
+class Speed6DOF(Serializable):
     @staticmethod
     def get_filename() -> str:
         return "speeds"
@@ -47,7 +47,7 @@ class Speed6DOF(Saveable):
 
 
 @dataclass
-class Acceleration6DOF(Saveable):
+class Acceleration6DOF(Serializable):
     @staticmethod
     def get_filename() -> str:
         return "accelerations"
@@ -63,7 +63,7 @@ class Acceleration6DOF(Saveable):
 
 
 @dataclass
-class DriveStep(Saveable):
+class DriveStep(Serializable):
     @staticmethod
     def get_filename() -> str:
         return "steps"
@@ -76,7 +76,7 @@ class DriveStep(Saveable):
 
 
 @dataclass
-class GeofencePoint(Saveable):
+class GeofencePoint(Serializable):
     @staticmethod
     def get_filename() -> str:
         return "geofence"
@@ -86,7 +86,7 @@ class GeofencePoint(Saveable):
 
 
 @dataclass
-class StateTransition(Saveable):
+class StateTransition(Serializable):
     @staticmethod
     def get_filename() -> str:
         return "state_transitions"

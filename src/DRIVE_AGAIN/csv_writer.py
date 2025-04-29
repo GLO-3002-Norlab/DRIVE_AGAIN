@@ -1,11 +1,11 @@
-from dataclasses import asdict
-import os
 import csv
-from typing import Type, TypeVar, Generic
+import os
+from dataclasses import asdict
+from typing import Generic, Type, TypeVar
 
-from DRIVE_AGAIN.saveable_types import Saveable
+from DRIVE_AGAIN.data_types import Serializable
 
-T = TypeVar("T", bound=Saveable)
+T = TypeVar("T", bound=Serializable)
 
 
 class CsvWriter(Generic[T]):
