@@ -87,3 +87,7 @@ body {
 .step-counter {
   font-size: 1.2rem;
 }
+
+.invert-colors {
+  filter: invert(1);
+}
