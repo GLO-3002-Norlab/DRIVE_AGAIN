@@ -2,7 +2,7 @@ import os
 from DRIVE_AGAIN.common import Command, Pose
 from DRIVE_AGAIN.saveable_types import GeofencePoint, Saveable, StateTransition
 from DRIVE_AGAIN.csv_writer import CsvWriter
-from DRIVE_AGAIN.saveable_types import DriveStep, Position6DOF
+from DRIVE_AGAIN.saveable_types import DriveStep, Position6DOF, Speed6DOF, Acceleration6DOF
 
 
 class DatasetRecorder:
@@ -15,6 +15,8 @@ class DatasetRecorder:
         # Built-in recorders
         self._register(DriveStep)
         self._register(Position6DOF)
+        self._register(Speed6DOF)
+        self._register(Acceleration6DOF)
         self._register(GeofencePoint)
         self._register(StateTransition)
 
@@ -32,14 +34,22 @@ class DatasetRecorder:
             raise ValueError(f"{saveable_type.__name__} has not been registered.")
         self.writers[saveable_type].save_line(row)
 
-    def save_command(self, command: Command, timestamp_ns: int):
-        new_step = DriveStep(timestamp_ns, self.step_id, *command)
+    def save_command(self, command: Command, is_step_completed: bool, timestamp_ns: int):
+        new_step = DriveStep(timestamp_ns, self.step_id, command[0], command[1], is_step_completed)
         self.writers[DriveStep].save_line(new_step)
         self.step_id += 1
 
     def save_pose(self, pose: Pose, timestamp_ns: int):
         pose_6DOF = Position6DOF(timestamp_ns, self.step_id, *pose)
         self.writers[Position6DOF].save_line(pose_6DOF)
+
+    def save_speed(self, speed: Pose, timestamp_ns: int):
+        speed_6DOF = Speed6DOF(timestamp_ns, self.step_id, *speed)
+        self.writers[Speed6DOF].save_line(speed_6DOF)
+
+    def save_acceleration(self, acceleration: Pose, timestamp_ns: int):
+        acc_6DOF = Acceleration6DOF(timestamp_ns, self.step_id, *acceleration)
+        self.writers[Acceleration6DOF].save_line(acc_6DOF)
 
     def save_geofence(self, geofence_points: list[tuple[float, float]]):
         for x, y in geofence_points:
@@ -53,6 +63,14 @@ class DatasetRecorder:
     def save_poses(self, poses_array):
         for pose, timestamp_ns in poses_array:
             self.save_pose(pose, timestamp_ns)
+
+    def save_speeds(self, speeds_array):
+        for speed, timestamp_ns in speeds_array:
+            self.save_speed(speed, timestamp_ns)
+
+    def save_accelerations(self, accelerations_array):
+        for acc, timestamp_ns in accelerations_array:
+            self.save_acceleration(acc, timestamp_ns)
 
     def save_experience(self, dataset_name: str):
         save_folder_path = os.path.join(self.datasets_folder, dataset_name)

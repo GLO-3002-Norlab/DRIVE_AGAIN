@@ -84,9 +84,15 @@ class RunningState(DriveState):
             self.drive.go_back_inside_geofence(timestamp_ns)
             return
 
-        last_poses = self.drive.robot.get_poses()
-        self.drive.robot.empty_pose_buffer()
+        last_poses = self.drive.robot.poses_buffer
+        last_speeds = self.drive.robot.speeds_buffer
+        last_accelerations = self.drive.robot.accelerations_buffer
+
         self.drive.dataset_recorder.save_poses(last_poses)
+        self.drive.dataset_recorder.save_speeds(last_speeds)
+        self.drive.dataset_recorder.save_accelerations(last_accelerations)
+
+        self.drive.robot.empty_buffers()
 
         current_step: Step = self.drive.current_step
 
@@ -170,13 +176,13 @@ class Drive:
     def run(self, timestamp_ns: float):
         self.current_state.run(timestamp_ns)
 
-    def sample_next_step(self, timestamp_ns: float):
+    def sample_next_step(self, timestamp_ns: float, is_step_completed: bool = True):
         command = self.command_sampling_strategy.sample_command()
         self.commands.append(command)
         self.current_step = Step(command, timestamp_ns)
         logging.info(f"Sampling next command {command} at timestamp {timestamp_ns}")
 
-        self.dataset_recorder.save_command(command, int(timestamp_ns))
+        self.dataset_recorder.save_command(command, is_step_completed, int(timestamp_ns))
 
     def is_robot_inside_geofence(self) -> bool:
         if self.geofence is None:
@@ -190,7 +196,7 @@ class Drive:
 
     def skip_current_step(self, timestamp_ns: float):
         logging.info("Skipping command...")
-        self.sample_next_step(timestamp_ns)
+        self.sample_next_step(timestamp_ns, is_step_completed=False)
 
     def get_commands(self) -> np.ndarray:
         return np.array(self.commands)
