@@ -22,22 +22,42 @@ function saveDataset(event) {
   console.log("Dataset saved with name:", datasetName);
 }
 
-socket.on("input_space_update", (data) => {
-  document.getElementById("input_space").src =
-    `data:image/png;base64,${data.image_data}`;
-});
-
-socket.on("robot_vizualisation_update", (data) => {
-  document.getElementById("robot_viz").src =
-    `data:image/png;base64,${data.image_data}`;
-});
-
 socket.on("skippable_state_start", (data) => {
   document.getElementById("skip-command-button").disabled = false;
 });
 
 socket.on("skippable_state_end", (data) => {
   document.getElementById("skip-command-button").disabled = true;
+});
+
+
+//
+// Graphs
+//
+
+const inputSpaceImg = document.getElementById("input_space");
+const robotVizImg = document.getElementById("robot_viz");
+
+function updateImageInversion() {
+  const isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  [inputSpaceImg, robotVizImg].forEach(img => {
+    if (isLight) {
+      img.classList.add("invert-colors");
+    } else {
+      img.classList.remove("invert-colors");
+    }
+  });
+}
+
+updateImageInversion();
+window.matchMedia('(prefers-color-scheme: light)').addEventListener("change", updateImageInversion);
+
+socket.on("input_space_update", (data) => {
+  inputSpaceImg.src = `data:image/png;base64,${data.image_data}`;
+});
+
+socket.on("robot_vizualisation_update", (data) => {
+  robotVizImg.src = `data:image/png;base64,${data.image_data}`;
 });
 
 

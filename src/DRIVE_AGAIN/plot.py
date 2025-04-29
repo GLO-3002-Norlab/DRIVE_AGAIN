@@ -70,7 +70,7 @@ def draw_robot(ax: Axes, pose: Pose, wheel_base: float) -> None:
         wheel_height,
         rotation_point=(x, y),
         angle=wheel_rotation_deg,
-        color="black",
+        color="purple",
     )
     right_wheel = matplotlib.patches.Rectangle(
         (right_wheel_x, right_wheel_y),
@@ -78,7 +78,7 @@ def draw_robot(ax: Axes, pose: Pose, wheel_base: float) -> None:
         wheel_height,
         rotation_point=(x, y),
         angle=wheel_rotation_deg,
-        color="black",
+        color="purple",
     )
 
     ax.add_patch(circle)
