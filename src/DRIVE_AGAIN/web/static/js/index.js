@@ -1,10 +1,6 @@
 const socket = io();
 let stage = 0;
 
-function skipCommandButtonClick() {
-  socket.emit("skip_command");
-}
-
 function handleButtonClick() {
   const button = document.getElementById("mainButton");
 
@@ -106,3 +102,20 @@ document.querySelectorAll(".modal-form").forEach(form => {
     }
   });
 });
+
+
+//
+// Steps
+//
+
+function setCurrentStep(step) {
+  document.getElementById('current-step').textContent = step;
+}
+
+function setTotalSteps(total) {
+  document.getElementById('total-steps').textContent = total;
+}
+
+function skipCommandButtonClick() {
+  socket.emit("skip_command");
+}
