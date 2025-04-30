@@ -1,22 +1,18 @@
-document.getElementById("reason-select").addEventListener("change", function (event) {
-    let value = document.getElementById("reason-select").value;
+const reasonSelect = document.getElementById("reason-select");
+const submitButton = document.getElementById("stop-reason-submit");
+const otherReasonInput = document.getElementById("other-reason-input");
+const reasonForm = document.getElementById("reason-form");
 
-    document.getElementById("stop-reason-submit").disabled = value === "";
+reasonSelect.addEventListener("change", () => {
+    const value = reasonSelect.value;
+    submitButton.disabled = value === "";
 
-    let otherReasonInput = document.getElementById("other-reason-input");
-    if (value === "other") {
-        otherReasonInput.style.display = "flex";
-        otherReasonInput.required = true;
-    } else {
-        otherReasonInput.style.display = "none";
-        otherReasonInput.required = false;
-    }
+    const isOther = value === "other";
+    otherReasonInput.required = isOther;
+    otherReasonInput.style.display = isOther ? "flex" : "none";
 });
 
-document.getElementById("reason-form").addEventListener("submit", function () {
-    if (document.getElementById("reason-select").value !== "other") {
-        closeStopModal(document.getElementById("reason-select").value);
-    } else {
-        closeStopModal(document.getElementById("other-reason-input").value);
-    }
+reasonForm.addEventListener("submit", () => {
+    const reason = reasonSelect.value === "other" ? otherReasonInput.value : reasonSelect.value;
+    closeStopModal(reason);
 });
