@@ -21,7 +21,6 @@ class DatasetRecorder:
 
         self.writers: dict[type[Serializable], CsvWriter] = {}
 
-        # Built-in recorders
         self._register(DriveStep)
         self._register(Position6DOF)
         self._register(Speed6DOF)

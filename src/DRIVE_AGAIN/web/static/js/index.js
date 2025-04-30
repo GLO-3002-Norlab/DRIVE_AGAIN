@@ -2,17 +2,12 @@ const socket = io();
 let stage = 0;
 
 function stopButtonClick() {
-  const button = document.getElementById("mainButton");
-  const stopButton = document.getElementById("stop-button");
-
   if (stage > 1) {
     document.getElementById("stop-modal").style.display = "flex";
   }
 }
 
 function closeStopModal(response) {
-  console.log("close stop modal");
-  console.log(response);
   document.getElementById("stop-modal").style.display = "none";
   if (response) {
     socket.emit("stop_drive", { reason: response });
@@ -36,6 +31,7 @@ function handleButtonClick() {
     button.disabled = true;
     stopButton.disabled = false;
   }
+
   stage++;
 }
 
@@ -56,14 +52,6 @@ function loadGeofence(event) {
   socket.emit("load_geofence", { name: datasetName });
   console.log("Geofence loaded from name:", datasetName);
 }
-
-socket.on("skippable_state_start", (data) => {
-  document.getElementById("skip-command-button").disabled = false;
-});
-
-socket.on("skippable_state_end", (data) => {
-  document.getElementById("skip-command-button").disabled = true;
-});
 
 socket.on("datasets", (data) => {
   let select = document.getElementById("dataset-load-select");
@@ -204,3 +192,11 @@ function setTotalSteps(total) {
 function skipCommandButtonClick() {
   socket.emit("skip_command");
 }
+
+socket.on("skippable_state_start", (data) => {
+  document.getElementById("skip-command").disabled = false;
+});
+
+socket.on("skippable_state_end", (data) => {
+  document.getElementById("skip-command").disabled = true;
+});
