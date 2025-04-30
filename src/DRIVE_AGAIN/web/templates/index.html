@@ -17,29 +17,19 @@
     <div class="selects">
       <select id="roboticist-select">
         <option value="">Select Roboticist</option>
-        <option value="roboticist1">Roboticist 1</option>
-        <option value="roboticist2">Roboticist 2</option>
         <option value="new">+ Create New</option>
       </select>
 
       <select id="robot-select">
         <option value="">Select Robot</option>
-        <option value="robot1">Robot 1</option>
-        <option value="robot2">Robot 2</option>
         <option value="new">+ Create New</option>
       </select>
 
       <select id="terrain-select">
         <option value="">Select Terrain</option>
-        <option value="terrain1">Terrain 1</option>
-        <option value="terrain2">Terrain 2</option>
         <option value="new">+ Create New</option>
       </select>
     </div>
-
-    <button id="skip-command-button" onclick="skipCommandButtonClick()" disabled="true">Skip Command</button>
-
-    <button id="stop-button" onclick="stopButtonClick()" disabled="true">Stop Drive</button>
 
     <form class="save-dataset-form" action="/submit" onsubmit="saveDataset(event)">
       <label for="dataset-name-input">Dataset name : </label>
@@ -61,13 +51,21 @@
   </main>
 
   <div class="bottom-bar">
+    <div class="skip-step-container">
+      <div id="step-counter" class="step-counter">
+        Step <span id="current-step">1</span> / <span id="total-steps">100</span>
+      </div>
+      <button id="skip-command-button" onclick="skipCommandButtonClick()" disabled="true">Skip</button>
+    </div>
+
+    <button id="stop-button" onclick="stopButtonClick()" disabled="true">Stop Drive</button>
+
     <button id="mainButton" onclick="handleButtonClick()">
       Start Geofencing
     </button>
   </div>
 
   {% include "modal.html" %}
-
   {% include "stop_modal.html" %}
 
   <script defer="defer" src="/static/js/index.js"></script>

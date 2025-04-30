@@ -36,6 +36,7 @@ nav:
   - Home: "index.md"
   - Installation: "Installation.md"
   - Configuration:
+      - "Architecture": "Architecture.md"
       - "Robot Module": "Robot.md"
       - "Drive Module": "Drive.md"
       - "Command Sampling Module": "CommandSampling.md"

@@ -1,10 +1,6 @@
 const socket = io();
 let stage = 0;
 
-function skipCommandButtonClick() {
-  socket.emit("skip_command");
-}
-
 function stopButtonClick() {
   const button = document.getElementById("mainButton");
   const stopButton = document.getElementById("stop-button");
@@ -61,16 +57,6 @@ function loadGeofence(event) {
   console.log("Geofence loaded from name:", datasetName);
 }
 
-socket.on("input_space_update", (data) => {
-  document.getElementById("input_space").src =
-    `data:image/png;base64,${data.image_data}`;
-});
-
-socket.on("robot_vizualisation_update", (data) => {
-  document.getElementById("robot_viz").src =
-    `data:image/png;base64,${data.image_data}`;
-});
-
 socket.on("skippable_state_start", (data) => {
   document.getElementById("skip-command-button").disabled = false;
 });
@@ -107,6 +93,36 @@ socket.on("state_transition", (state) => {
     default:
       break;
   }
+});
+
+
+//
+// Graphs
+//
+
+const inputSpaceImg = document.getElementById("input_space");
+const robotVizImg = document.getElementById("robot_viz");
+
+function updateImageInversion() {
+  const isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  [inputSpaceImg, robotVizImg].forEach(img => {
+    if (isLight) {
+      img.classList.add("invert-colors");
+    } else {
+      img.classList.remove("invert-colors");
+    }
+  });
+}
+
+updateImageInversion();
+window.matchMedia('(prefers-color-scheme: light)').addEventListener("change", updateImageInversion);
+
+socket.on("input_space_update", (data) => {
+  inputSpaceImg.src = `data:image/png;base64,${data.image_data}`;
+});
+
+socket.on("robot_vizualisation_update", (data) => {
+  robotVizImg.src = `data:image/png;base64,${data.image_data}`;
 });
 
 
@@ -171,3 +187,20 @@ document.querySelectorAll(".modal-form").forEach(form => {
     }
   });
 });
+
+
+//
+// Steps
+//
+
+function setCurrentStep(step) {
+  document.getElementById('current-step').textContent = step;
+}
+
+function setTotalSteps(total) {
+  document.getElementById('total-steps').textContent = total;
+}
+
+function skipCommandButtonClick() {
+  socket.emit("skip_command");
+}

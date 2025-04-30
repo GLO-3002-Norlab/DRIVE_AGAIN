@@ -161,3 +161,11 @@ setupImagePreview("robot-image", "robot-preview");
 setupImagePreview("robot-env-image", "robot-env-preview");
 setupImagePreview("env-image", "env-preview");
 setupImagePreview("ground-image", "ground-preview");
+
+window.addEventListener("DOMContentLoaded", () => {
+    updateTractionFields();
+    updateParticleSizeField();
+
+    document.getElementById("robotTraction").addEventListener("change", updateTractionFields);
+    document.getElementById("terrainHardness").addEventListener("change", updateParticleSizeField);
+});
