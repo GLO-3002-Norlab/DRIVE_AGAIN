@@ -285,7 +285,12 @@ class Drive:
         if self.current_state.__class__ in (RunningState, PausedState, BackToCenterState):
             logging.info(f"Stopped at timestamp {timestamp_ns}")
             self.dataset_recorder.save_stop_reason(reason)
-            self._transition_to_new_state(ReadyState(self), timestamp_ns)
+            self._transition_to_new_state(WaitingState(self), timestamp_ns)
+
+            self.geofence = None
+            self.current_step = None
+            self.commands.clear()
+
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "stop_drive")
