@@ -194,9 +194,9 @@ function skipCommandButtonClick() {
 }
 
 socket.on("skippable_state_start", (data) => {
-  document.getElementById("skip-command").disabled = false;
+  document.getElementById("skip-command-button").disabled = false;
 });
 
 socket.on("skippable_state_end", (data) => {
-  document.getElementById("skip-command").disabled = true;
+  document.getElementById("skip-command-button").disabled = true;
 });
