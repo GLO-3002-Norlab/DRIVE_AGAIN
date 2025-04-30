@@ -10,7 +10,7 @@ from DRIVE_AGAIN.data_types import (
     Acceleration6DOF,
     Serializable,
     StateTransition,
-    StopReason
+    StopReason,
 )
 
 
