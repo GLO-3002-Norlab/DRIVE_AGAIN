@@ -112,11 +112,6 @@ class PausedState(DriveState):
             return
 
 
-class StoppedState(DriveState):
-    def run(self, timestamp_ns: float):
-        pass
-
-
 class BackToCenterState(DriveState):
     def __init__(self, drive, timestamp_ns: float):
         super().__init__(drive)
@@ -229,7 +224,6 @@ class Drive:
     def start_geofence(self, timestamp_ns: float):
         if self.current_state.__class__ == WaitingState:
             logging.info(f"Starting geofence creation at timestamp {timestamp_ns}")
-
             self._transition_to_new_state(GeofenceCreationState(self), timestamp_ns)
             return
 
@@ -238,18 +232,16 @@ class Drive:
     def restart_geofence(self, timestamp_ns: float):
         if self.current_state.__class__ == GeofenceCreationState:
             logging.info(f"Restarting geofence creation at timestamp {timestamp_ns}")
-
             self._transition_to_new_state(GeofenceCreationState(self), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "restart_geofence")
 
     def confirm_geofence(self, timestamp_ns: float):
-        if self.current_state.__class__ == GeofenceCreationState or self.current_state.__class__ == WaitingState:
+        if self.current_state.__class__ in (GeofenceCreationState, WaitingState):
             logging.info(f"Confirmed geofence at timestamp {timestamp_ns}")
             self.geofence = Geofence(self.current_state.geofence_points)  # type: ignore
             self.dataset_recorder.save_geofence(self.current_state.geofence_points)  # type: ignore
-
             self._transition_to_new_state(ReadyState(self), timestamp_ns)
             return
 
@@ -259,7 +251,6 @@ class Drive:
         if self.current_state.__class__ == ReadyState and self.current_step is None:
             logging.info(f"Starting drive at timestamp {timestamp_ns}")
             self.sample_next_step(timestamp_ns)
-
             self._transition_to_new_state(RunningState(self, timestamp_ns), timestamp_ns)
             return
 
@@ -268,19 +259,15 @@ class Drive:
     def pause_drive(self, timestamp_ns: float):
         if self.current_state.__class__ == RunningState:
             logging.info(f"Pausing drive at timestamp {timestamp_ns}")
-
             self._transition_to_new_state(PausedState(self), timestamp_ns)
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "pause_drive")
 
     def resume_drive(self, timestamp_ns: float):
-        if (
-            self.current_state.__class__ == PausedState or self.current_state.__class__ == BackToCenterState
-        ) and self.current_step is not None:
+        if self.current_state.__class__ in (PausedState, BackToCenterState) and self.current_step is not None:
             logging.info(f"Resuming drive at timestamp {timestamp_ns}")
             self.current_step.start_timestamp_ns = timestamp_ns
-
             self._transition_to_new_state(RunningState(self, timestamp_ns), timestamp_ns)
             return
 
@@ -294,13 +281,19 @@ class Drive:
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "resume_drive")
 
-    def stop_drive(self, timestamp_ns: float):
-        if self.current_state.__class__ == RunningState:
+    def stop_drive(self, reason: str, timestamp_ns: float):
+        if self.current_state.__class__ in (RunningState, PausedState, BackToCenterState):
             logging.info(f"Stopped at timestamp {timestamp_ns}")
-            self._transition_to_new_state(StoppedState(self), timestamp_ns)
+            self.dataset_recorder.save_stop_reason(reason)
+            self._transition_to_new_state(WaitingState(self), timestamp_ns)
+
+            self.geofence = None
+            self.current_step = None
+            self.commands.clear()
+
             return
 
         raise IllegalStateTransition(self.current_state.__class__.__name__, "stop_drive")
 
     def can_skip_command(self) -> bool:
-        return self.current_state.__class__ == RunningState or self.current_state.__class__ == PausedState
+        return self.current_state.__class__ in (RunningState, PausedState)

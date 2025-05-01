@@ -1,19 +1,45 @@
 const socket = io();
 let stage = 0;
 
-function handleButtonClick() {
-  const button = document.getElementById("mainButton");
+const button = document.getElementById("mainButton");
 
+function closeStopModal(response) {
+  document.getElementById("stop-modal").style.display = "none";
+
+  if (!response) {
+    return
+  }
+
+  socket.emit("stop_drive", { reason: response });
+
+  button.textContent = "Start Drive";
+  stage = 0;
+}
+
+function handleButtonClick() {
   if (stage === 0) {
     socket.emit("start_geofencing");
-    button.textContent = "Stop Geofencing";
+    button.textContent = "End Geofencing";
+    stage++;
   } else if (stage === 1) {
     socket.emit("start_drive");
-    button.textContent = "Drive Started";
-    button.disabled = true;
+    button.textContent = "Stop";
+    stage++;
+  } else if (stage === 2) {
+    document.getElementById("stop-modal").style.display = "flex";
   }
-  stage++;
 }
+
+socket.on("state_transition", (state) => {
+  console.log("state transition to: " + state);
+
+  switch (state) {
+    case "ready_state":
+      break;
+    default:
+      break;
+  }
+});
 
 function saveDataset(event) {
   event.preventDefault();
@@ -33,14 +59,6 @@ function loadGeofence(event) {
   console.log("Geofence loaded from name:", datasetName);
 }
 
-socket.on("skippable_state_start", (data) => {
-  document.getElementById("skip-command-button").disabled = false;
-});
-
-socket.on("skippable_state_end", (data) => {
-  document.getElementById("skip-command-button").disabled = true;
-});
-
 socket.on("datasets", (data) => {
   let select = document.getElementById("dataset-load-select");
   let v = select.value;
@@ -54,21 +72,6 @@ socket.on("datasets", (data) => {
 
 socket.on("confirm_geofence", (state) => {
   console.log("confirm geofence called but how??");
-});
-
-socket.on("state_transition", (state) => {
-  console.log("state transition to: " + state);
-  const button = document.getElementById("mainButton");
-
-  switch (state) {
-    case "ready_state":
-      button.textContent = "Start Drive";
-      button.disabled = false;
-      stage = 1;
-      break;
-    default:
-      break;
-  }
 });
 
 
@@ -166,8 +169,10 @@ document.querySelectorAll(".modal-form").forEach(form => {
 
 
 //
-// Steps
+// Commands
 //
+
+const skipCommandButton = document.getElementById("skip-command-button")
 
 function setCurrentStep(step) {
   document.getElementById('current-step').textContent = step;
@@ -180,3 +185,11 @@ function setTotalSteps(total) {
 function skipCommandButtonClick() {
   socket.emit("skip_command");
 }
+
+socket.on("skippable_state_start", (data) => {
+  skipCommandButton.disabled = false;
+});
+
+socket.on("skippable_state_end", (data) => {
+  skipCommandButton.disabled = true;
+});

@@ -10,6 +10,7 @@ from DRIVE_AGAIN.data_types import (
     Acceleration6DOF,
     Serializable,
     StateTransition,
+    StopReason,
 )
 
 
@@ -20,13 +21,13 @@ class DatasetRecorder:
 
         self.writers: dict[type[Serializable], CsvWriter] = {}
 
-        # Built-in recorders
         self._register(DriveStep)
         self._register(Position6DOF)
         self._register(Speed6DOF)
         self._register(Acceleration6DOF)
         self._register(GeofencePoint)
         self._register(StateTransition)
+        self._register(StopReason)
 
     def _register(self, saveable_type: type[Serializable]):
         self.writers[saveable_type] = CsvWriter(saveable_type)
@@ -67,6 +68,10 @@ class DatasetRecorder:
     def save_state_transition(self, from_state: str, to_state: str, timestamp_ns: int):
         state_transition = StateTransition(timestamp_ns, self.step_id, from_state, to_state)
         self.writers[StateTransition].save_line(state_transition)
+
+    def save_stop_reason(self, reason: str):
+        stop_reason = StopReason(reason)
+        self.writers[StopReason].save_line(stop_reason)
 
     def save_poses(self, poses_array):
         for pose, timestamp_ns in poses_array:
