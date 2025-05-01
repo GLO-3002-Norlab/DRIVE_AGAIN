@@ -63,6 +63,9 @@ class Server:
     def state_transition(self, state: str):
         self.socketio.emit("state_transition", state)
 
+    def sample_next_step(self, command, step_count):
+        self.socketio.emit("sample_next_step", {"command": command.tolist(), "step_count": step_count})
+
     def create_server(self, drive: Drive, get_current_timestamp_ns: Callable[[], float]):
         app = Flask(__name__, static_url_path="/static", static_folder="web/static", template_folder="web/templates")
         socketio = SocketIO(app)

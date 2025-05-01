@@ -45,7 +45,7 @@ function saveDataset(event) {
   event.preventDefault();
   const datasetName = document.getElementById("dataset-name-input").value;
   socket.emit("save_dataset", { name: datasetName });
-  console.log("Dataset saved with name:", datasetName);
+  alert("Dataset saved with name:", datasetName);
 }
 
 function updateDatasets() {
@@ -171,6 +171,13 @@ document.querySelectorAll(".modal-form").forEach(form => {
 //
 // Commands
 //
+
+socket.on("sample_next_step", (data) => {
+  const command = data.command;
+  const step_count = data.step_count;
+
+  setCurrentStep(step_count);
+});
 
 const skipCommandButton = document.getElementById("skip-command-button")
 

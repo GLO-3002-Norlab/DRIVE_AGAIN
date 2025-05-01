@@ -54,7 +54,7 @@ function updateParticleSizeField() {
 document.getElementById("robot-select-form").addEventListener("submit", function (event) {
     event.preventDefault();
 
-    const name = document.getElementById("robotName").value.trim();
+    const name = document.getElementById("robotname").value.trim();
     const manufacturer = document.getElementById("robotManufacturer").value.trim();
     const modification = document.getElementById("robotModification").value;
     const weight = document.getElementById("robotWeight").value.trim();

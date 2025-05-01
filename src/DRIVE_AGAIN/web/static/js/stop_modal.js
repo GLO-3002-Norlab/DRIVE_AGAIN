@@ -12,7 +12,8 @@ reasonSelect.addEventListener("change", () => {
     otherReasonInput.style.display = isOther ? "flex" : "none";
 });
 
-reasonForm.addEventListener("submit", () => {
+reasonForm.addEventListener("submit", (e) => {
+    e.preventDefault();
     const reason = reasonSelect.value === "other" ? otherReasonInput.value : reasonSelect.value;
     closeStopModal(reason);
 });

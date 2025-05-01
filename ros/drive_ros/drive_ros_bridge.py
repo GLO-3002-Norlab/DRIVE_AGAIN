@@ -85,6 +85,7 @@ class DriveRosBridge(Node):
             self.nb_steps,
             self.step_duration_s,
             self.state_transition_cb,
+            self.sample_next_step_cb,
         )
 
         # Interface setup
@@ -121,6 +122,9 @@ class DriveRosBridge(Node):
 
     def state_transition_cb(self, state: str):
         self.interface_server.state_transition(state)
+
+    def sample_next_step_cb(self, command, step_count):
+        self.interface_server.sample_next_step(command, step_count)
 
     def send_command(self, command):
         msg = Twist()

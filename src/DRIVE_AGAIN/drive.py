@@ -149,6 +149,7 @@ class Drive:
         target_nb_steps: int,
         step_duration_s: float,
         state_transition_cb,
+        sample_next_step_cb,
     ):
         self.robot = robot
         self.command_sampling_strategy = command_sampling_strategy
@@ -164,15 +165,17 @@ class Drive:
         self.dataset_reader = DatasetReader(experience_dir)
 
         self.commands = []
+        self.step_counter = 0
 
-        self._state_transition_cb = state_transition_cb
+        self.state_transition_cb = state_transition_cb
+        self.sample_next_step_cb = sample_next_step_cb
 
     def _transition_to_new_state(self, new_state: DriveState, timestamp_ns: float):
         self.dataset_recorder.save_state_transition(
             self.current_state.get_state_name(), new_state.get_state_name(), int(timestamp_ns)
         )
         self.current_state = new_state
-        self._state_transition_cb(new_state.get_state_name())
+        self.state_transition_cb(new_state.get_state_name())
 
     def run(self, timestamp_ns: float):
         self.current_state.run(timestamp_ns)
@@ -182,6 +185,9 @@ class Drive:
         self.commands.append(command)
         self.current_step = Step(command, timestamp_ns)
         logging.info(f"Sampling next command {command} at timestamp {timestamp_ns}")
+
+        self.step_counter += 1
+        self.sample_next_step_cb(command, self.step_counter)
 
         self.dataset_recorder.save_command(command, is_step_completed, int(timestamp_ns))
 
@@ -207,6 +213,7 @@ class Drive:
 
     def skip_current_step(self, timestamp_ns: float):
         logging.info("Skipping command...")
+        self.step_counter -= 1
         self.sample_next_step(timestamp_ns, is_step_completed=False)
 
     def get_commands(self) -> np.ndarray:
@@ -289,6 +296,7 @@ class Drive:
 
             self.geofence = None
             self.current_step = None
+            self.step_counter = 0
             self.commands.clear()
 
             return
